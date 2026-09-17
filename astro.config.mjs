@@ -14,8 +14,8 @@ import tailwind from "@astrojs/tailwind";
 import node from "@astrojs/node";
 
 // Two separate origins now: the Node app (SITE_URL, e.g.
-// airlineslocations.com) and WordPress on its own subdomain (WP_API_URL, e.g.
-// cms.airlineslocations.com) — separate vhosts on Hostinger, no path routing
+// airlineairportguide.com) and WordPress on its own subdomain (WP_API_URL, e.g.
+// cms.airlineairportguide.com) — separate vhosts on Hostinger, no path routing
 // between them to worry about. See src/lib/wp.ts for the same pair read at
 // runtime via process.env.
 const wpApiUrl = process.env.WP_API_URL ?? "http://localhost:8080/wp-json/wp/v2";

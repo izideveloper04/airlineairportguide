@@ -6,12 +6,12 @@ import he from "he";
 // process.env (not import.meta.env) so this is read live from the Node
 // process's environment on Hostinger — changing WP_API_URL in the Node.js
 // App panel + restarting the app is enough, no rebuild required.
-// WordPress lives on its own subdomain (e.g. cms.airlineslocations.com),
+// WordPress lives on its own subdomain (e.g. cms.airlineairportguide.com),
 // entirely separate from SITE_URL (the Node app's own domain) — no
 // derivation between the two, since they're independent vhosts.
 const WP_API_URL = (process.env.WP_API_URL ?? "http://localhost:8080/wp-json/wp/v2").replace(/\/+$/, "");
 
-/** The WP origin (e.g. https://cms.airlineslocations.com) - just for rewriting
+/** The WP origin (e.g. https://cms.airlineairportguide.com) - just for rewriting
  *  the WP-origin URLs baked into Yoast's schema graph (see YoastHead.schema)
  *  to this site's own origin before it's injected into a page's <head>. */
 export function getWpOrigin(): string {

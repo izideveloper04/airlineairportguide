@@ -134,8 +134,8 @@ Static/landing pages (`index.astro`, `404.astro`) set `title`/`description` dire
 
 ```
 STAGING=true
-SITE_URL=https://airlineslocations.com
-WP_API_URL=https://cms.airlineslocations.com/wp-json/wp/v2
+SITE_URL=https://airlineairportguide.com
+WP_API_URL=https://cms.airlineairportguide.com/wp-json/wp/v2
 AVIATIONSTACK_API_KEY=
 AVIATIONSTACK_CACHE_TTL=120
 PAGE_TREE_CACHE_TTL=300
@@ -158,12 +158,12 @@ SITE_TITLE=Airlines Locations
 
 **Decided: Hostinger only** — Business or Cloud plan (required for the "Setup Node.js App" hPanel feature; plain shared hosting can't run a Node process). WordPress and the Astro app are **separate subdomains on the same Hostinger account**, not a shared domain with a subfolder split (an earlier version of this plan used a `public_html/wordpress` subfolder — replaced once the domain layout was finalized):
 
-- `airlineslocations.com` — the Astro Node app, root domain.
-- `cms.airlineslocations.com` — a separate Hostinger subdomain, its own document root, a standard (non-headless-special) WordPress install.
+- `airlineairportguide.com` — the Astro Node app, root domain.
+- `cms.airlineairportguide.com` — a separate Hostinger subdomain, its own document root, a standard (non-headless-special) WordPress install.
 
 Because these are two distinct vhosts, there's no path-routing conflict to configure at all — each subdomain's webserver only ever sees requests meant for it. This is simpler than the subfolder approach, which needed Hostinger to route `/wordpress/*` to WP ahead of the Node app.
 
-- The Astro project builds with `@astrojs/node` in `standalone` mode (`astro.config.mjs`), producing `dist/` (static assets + `dist/server/entry.mjs`). Hostinger's Node.js App feature runs that entry file as a persistent process bound to the `airlineslocations.com` subdomain/application-URL slot; Passenger (Hostinger's Node process manager) sets `PORT`/`HOST` env vars that `@astrojs/node` standalone reads automatically — no manual port wiring needed.
+- The Astro project builds with `@astrojs/node` in `standalone` mode (`astro.config.mjs`), producing `dist/` (static assets + `dist/server/entry.mjs`). Hostinger's Node.js App feature runs that entry file as a persistent process bound to the `airlineairportguide.com` subdomain/application-URL slot; Passenger (Hostinger's Node process manager) sets `PORT`/`HOST` env vars that `@astrojs/node` standalone reads automatically — no manual port wiring needed.
 - Set `SITE_URL`, `WP_API_URL`, `AVIATIONSTACK_API_KEY`, `AVIATIONSTACK_CACHE_TTL`, `PAGE_TREE_CACHE_TTL`, `SITE_TITLE` directly in the Node.js App's environment-variables panel in hPanel — there's no `.env`-file loading in production, only the actual process environment (see §9).
 - No deploy hook / rebuild trigger is needed for content edits (§1) — only redeploy (rebuild + restart the Node app) when the Astro *code* changes, not when WP content changes.
 - CORS is still not required on the WP side (§2) — the subdomain split doesn't change this, since the Astro Node process fetches WP server-side either way, never from the visitor's browser.
