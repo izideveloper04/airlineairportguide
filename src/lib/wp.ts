@@ -679,18 +679,26 @@ export async function getChildren(parent: { id: number; fullPath: string }): Pro
 /**
  * The template → layout naming convention (see IMPLEMENTATION.md §4): a page
  * assigned WordPress's page-templates/parent-page-template.php (bare, or
- * prefixed like "page-templates/parent-page-template.php") is a
+ * path-prefixed, e.g. "page-templates/parent-page-template.php") is a
  * section-parent page; child-page-template.php is a section-child page.
  * Exported so [...slug].astro's layout picker, ChildPageLayout's sibling
  * filter, and getParentPages() below share one definition instead of
  * duplicating the regex.
+ *
+ * The boundary before the template name is deliberately "/" or
+ * start-of-string only — not "-" — so a same-suffix-but-different template
+ * like "page-templates/All-parent-page-template.php" (WordPress's own
+ * site-wide directory template, found assigned to a page literally titled
+ * "Airline Terminals") doesn't get mistaken for this one just because it
+ * ends the same way. A hyphen right before "parent-page-template.php" means
+ * it's a different template name, not a path separator.
  */
 export function isParentTemplate(template: string): boolean {
-  return /(?:^|[-/])parent-page-template\.php$/i.test(template);
+  return /(?:^|\/)parent-page-template\.php$/i.test(template);
 }
 
 export function isChildTemplate(template: string): boolean {
-  return /(?:^|[-/])child-page-template\.php$/i.test(template);
+  return /(?:^|\/)child-page-template\.php$/i.test(template);
 }
 
 /**
