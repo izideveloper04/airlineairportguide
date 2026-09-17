@@ -1,18 +1,18 @@
 ---
 // Hand-built directory page (not a single WP record) — lists every page
-// using an "airlines-child.php" template, regardless of where each one
-// sits in the page tree. Airlines pages are flat now (no airlines-parent.php
-// section-parent above them) — this still works unchanged either way, since
-// getPagesByTemplateSuffix matches by template, not by tree position.
-// "airlines" is reserved in RESERVED_SLUGS (wp.ts) so a WP page can never
-// shadow this route.
+// using the parent-section template (page-templates/parent-page-template.php),
+// regardless of where each one sits in the page tree — i.e. the top-level
+// parent pages (airlines, in this site's content). getParentPages() matches
+// by template, not by tree position, so this works the same whether or not
+// a parent page itself has any ancestors. "airlines" is reserved in
+// RESERVED_SLUGS (wp.ts) so a WP page can never shadow this route.
 export const prerender = false;
 
 import BaseLayout from "../layouts/BaseLayout.astro";
 import Breadcrumbs from "../components/Breadcrumbs.astro";
-import { getPagesByTemplateSuffix } from "../lib/wp";
+import { getParentPages } from "../lib/wp";
 
-const airlines = await getPagesByTemplateSuffix("airlines-parent.php");
+const airlines = await getParentPages();
 
 // Backs the homepage hero's search box (GET /airlines?q=...) as well as an
 // on-page search here — filtered server-side since the full list is

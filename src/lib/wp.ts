@@ -677,27 +677,13 @@ export async function getChildren(parent: { id: number; fullPath: string }): Pro
 }
 
 /**
- * Every page using a WP template ending in `suffix` (e.g. "airlines-parent.php"),
- * regardless of where it sits in the hierarchy — for directory-style listing
- * pages like /airlines. This one genuinely needs to scan the whole catalog
- * (there's no WP-side way to filter pages by template), so it stays backed
- * by the shared, TTL/SWR-cached getPageTree() rather than a per-request fetch.
- */
-export async function getPagesByTemplateSuffix(suffix: string): Promise<WPPageSummary[]> {
-  const tree = await getPageTree();
-  const needle = suffix.toLowerCase();
-  return tree.list
-    .filter((p) => p.template.toLowerCase().endsWith(needle))
-    .sort((a, b) => a.menuOrder - b.menuOrder || a.title.localeCompare(b.title));
-}
-
-/**
- * The template → layout naming convention (see IMPLEMENTATION.md §4):
- * anything ending in "parent.php" (bare, or prefixed like
- * "parking-parent.php") is a section-parent page; anything ending in
- * "child.php" is a section-child page. Exported so [...slug].astro's layout
- * picker and ChildPageLayout's sibling filter (only show *-child.php
- * siblings) share one definition instead of duplicating the regex.
+ * The template → layout naming convention (see IMPLEMENTATION.md §4): a page
+ * assigned WordPress's page-templates/parent-page-template.php (bare, or
+ * prefixed like "page-templates/parent-page-template.php") is a
+ * section-parent page; child-page-template.php is a section-child page.
+ * Exported so [...slug].astro's layout picker, ChildPageLayout's sibling
+ * filter, and getParentPages() below share one definition instead of
+ * duplicating the regex.
  */
 export function isParentTemplate(template: string): boolean {
   return /(?:^|[-/])parent-page-template\.php$/i.test(template);
@@ -705,6 +691,20 @@ export function isParentTemplate(template: string): boolean {
 
 export function isChildTemplate(template: string): boolean {
   return /(?:^|[-/])child-page-template\.php$/i.test(template);
+}
+
+/**
+ * Every page using the parent-section template, regardless of where it sits
+ * in the hierarchy — the top-level directory for pages like /airlines. This
+ * genuinely needs to scan the whole catalog (there's no WP-side way to
+ * filter pages by template), so it stays backed by the shared, TTL/SWR-cached
+ * getPageTree() rather than a per-request fetch.
+ */
+export async function getParentPages(): Promise<WPPageSummary[]> {
+  const tree = await getPageTree();
+  return tree.list
+    .filter((p) => isParentTemplate(p.template))
+    .sort((a, b) => a.menuOrder - b.menuOrder || a.title.localeCompare(b.title));
 }
 
 let siteSettingsCache: { settings: SiteSettings; expires: number } | null = null;
