@@ -157,7 +157,7 @@ function apiUrl(path: string) {
  *  "home" is WordPress's own default sample page slug on a fresh install -
  *  reserved so a leftover, never-deleted one can never leak into the page
  *  tree as a second, competing homepage at /home. */
-const RESERVED_SLUGS = new Set(["", "api", "airlines", "blog", "home"]);
+const RESERVED_SLUGS = new Set(["", "api", "airlines", "airline-terminals", "blog", "home"]);
 
 // Fields for the catalog-wide listing (page tree / sitemap / llms.txt /
 // section children) — no `content` or `yoast_head_json`. Those two are by
