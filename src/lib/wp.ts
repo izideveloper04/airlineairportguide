@@ -41,23 +41,47 @@ export interface YoastHead {
   schema?: { "@context": string; "@graph": Record<string, unknown>[] };
 }
 
-export interface WPPage {
+/**
+ * The lightweight shape used everywhere a page is listed alongside its
+ * siblings — the page tree, a section's children, breadcrumb ancestors.
+ * Deliberately excludes `content`/`yoast`/`commentsOpen`: those are only
+ * ever needed for the single page actually being rendered (see WPPage
+ * below), and fetching them for every row of a large catalog is what made
+ * the old page-tree crawl slow enough to 504 (see IMPLEMENTATION.md §4a).
+ */
+export interface WPPageSummary {
   id: number;
   slug: string;
   parent: number;
   title: string;
-  content: string;
   template: string;
   menuOrder: number;
   date: string;
-  yoast: YoastHead | null;
   featuredImage: string | null;
   /** Computed by walking the parent chain, e.g. "flights/departures". */
   fullPath: string;
+}
+
+/** The full record for the one page actually being rendered this request. */
+export interface WPPage extends WPPageSummary {
+  content: string;
+  yoast: YoastHead | null;
   /** WP's own per-page Discussion setting ("Allow comments") — the comment
    *  form is hidden entirely when this is false, independent of whether any
    *  approved comments already exist. */
   commentsOpen: boolean;
+}
+
+/** A breadcrumb-ready ancestor — title/fullPath is all any layout needs. */
+export interface Breadcrumb {
+  title: string;
+  fullPath: string;
+}
+
+export interface ResolvedPage {
+  page: WPPage;
+  /** Root-first. */
+  ancestors: Breadcrumb[];
 }
 
 export interface SiteSettings {
@@ -65,9 +89,9 @@ export interface SiteSettings {
 }
 
 export interface PageTree {
-  byId: Map<number, WPPage>;
-  byPath: Map<string, WPPage>;
-  list: WPPage[];
+  byId: Map<number, WPPageSummary>;
+  byPath: Map<string, WPPageSummary>;
+  list: WPPageSummary[];
 }
 
 interface RawWPPage {
@@ -75,7 +99,7 @@ interface RawWPPage {
   slug: string;
   parent: number;
   title: { rendered: string };
-  content: { rendered: string };
+  content?: { rendered: string };
   wp_template?: string;
   menu_order?: number;
   date: string;
@@ -135,24 +159,47 @@ function apiUrl(path: string) {
  *  tree as a second, competing homepage at /home. */
 const RESERVED_SLUGS = new Set(["", "api", "airlines", "blog", "home"]);
 
+// Fields for the catalog-wide listing (page tree / sitemap / llms.txt /
+// section children) — no `content` or `yoast_head_json`. Those two are by
+// far the heaviest part of a WP page response (full rendered HTML, and
+// Yoast's whole schema graph), and WP's REST controller only bothers
+// generating them when they're actually requested via _fields — omitting
+// them here cuts both the payload and the server-side work, not just what
+// gets sent over the wire. Only the single page actually being rendered
+// needs those (see FULL_PAGE_FIELDS / getPageByPath below).
+const SUMMARY_PAGE_FIELDS = "id,slug,parent,title,wp_template,menu_order,date,_links,_embedded";
+const FULL_PAGE_FIELDS = "id,slug,parent,title,content,wp_template,menu_order,date,yoast_head_json,comment_status,_links,_embedded";
+
+// A full catalog fetch (dozens to hundreds of paginated requests on a large
+// site) is done as a bounded fan-out rather than one request at a time —
+// this WP host has also been observed taking 10-20s for even a single-row
+// request, so sequential pagination alone was the main source of the 504s
+// this replaced. Kept modest rather than "everything at once" so this
+// doesn't hammer a host that's already resource-constrained.
+const CATALOG_FETCH_CONCURRENCY = 6;
+
+async function fetchPagesPage(pageNum: number, perPage: number, fields: string): Promise<{ items: RawWPPage[]; totalPages: number }> {
+  const res = await fetch(
+    apiUrl(`/pages?per_page=${perPage}&page=${pageNum}&_embed=wp:featuredmedia&_fields=${fields}`),
+    { headers: NO_CACHE_REQUEST_HEADERS },
+  );
+  if (!res.ok) {
+    throw new Error(`WP page tree fetch failed: ${res.status} ${res.statusText}`);
+  }
+  return { items: await res.json(), totalPages: Number(res.headers.get("X-WP-TotalPages") ?? "1") };
+}
+
 async function fetchAllPages(): Promise<RawWPPage[]> {
   const perPage = 100;
-  let page = 1;
-  let totalPages = 1;
-  const results: RawWPPage[] = [];
+  const first = await fetchPagesPage(1, perPage, SUMMARY_PAGE_FIELDS);
+  const results: RawWPPage[] = [...first.items];
 
-  do {
-    const res = await fetch(
-      apiUrl(`/pages?per_page=${perPage}&page=${page}&_embed=wp:featuredmedia&_fields=id,slug,parent,title,content,wp_template,menu_order,date,yoast_head_json,comment_status,_links,_embedded`),
-      { headers: NO_CACHE_REQUEST_HEADERS },
-    );
-    if (!res.ok) {
-      throw new Error(`WP page tree fetch failed: ${res.status} ${res.statusText}`);
-    }
-    totalPages = Number(res.headers.get("X-WP-TotalPages") ?? "1");
-    results.push(...(await res.json()));
-    page += 1;
-  } while (page <= totalPages);
+  const remainingPageNumbers = Array.from({ length: Math.max(0, first.totalPages - 1) }, (_, i) => i + 2);
+  for (let i = 0; i < remainingPageNumbers.length; i += CATALOG_FETCH_CONCURRENCY) {
+    const batch = remainingPageNumbers.slice(i, i + CATALOG_FETCH_CONCURRENCY);
+    const batchResults = await Promise.all(batch.map((pageNum) => fetchPagesPage(pageNum, perPage, SUMMARY_PAGE_FIELDS)));
+    for (const { items } of batchResults) results.push(...items);
+  }
 
   return results;
 }
@@ -198,6 +245,20 @@ function computeFullPath(id: number, byId: Map<number, RawWPPage>): string {
   return segments.join("/");
 }
 
+function toSummary(p: RawWPPage, fullPath: string): WPPageSummary {
+  return {
+    id: p.id,
+    slug: p.slug,
+    parent: p.parent,
+    title: he.decode(p.title.rendered),
+    template: p.wp_template ?? "",
+    menuOrder: p.menu_order ?? 0,
+    date: p.date,
+    featuredImage: p._embedded?.["wp:featuredmedia"]?.[0]?.source_url ?? null,
+    fullPath,
+  };
+}
+
 let cache: { tree: PageTree; expires: number } | null = null;
 let inflight: Promise<PageTree> | null = null;
 // Bumped by purgeCache() so a rebuild already in flight when a purge lands
@@ -209,29 +270,15 @@ async function buildPageTree(): Promise<PageTree> {
   const raw = await fetchAllPages();
   const rawById = new Map(raw.map((p) => [p.id, p]));
 
-  const byId = new Map<number, WPPage>();
-  const byPath = new Map<string, WPPage>();
-  const list: WPPage[] = [];
+  const byId = new Map<number, WPPageSummary>();
+  const byPath = new Map<string, WPPageSummary>();
+  const list: WPPageSummary[] = [];
 
   for (const p of raw) {
     const fullPath = normalizePath(computeFullPath(p.id, rawById));
     if (RESERVED_SLUGS.has(fullPath)) continue;
 
-    const page: WPPage = {
-      id: p.id,
-      slug: p.slug,
-      parent: p.parent,
-      title: he.decode(p.title.rendered),
-      content: p.content.rendered,
-      template: p.wp_template ?? "",
-      menuOrder: p.menu_order ?? 0,
-      date: p.date,
-      yoast: p.yoast_head_json ?? null,
-      featuredImage: p._embedded?.["wp:featuredmedia"]?.[0]?.source_url ?? null,
-      fullPath,
-      commentsOpen: p.comment_status === "open",
-    };
-
+    const page = toSummary(p, fullPath);
     byId.set(page.id, page);
     byPath.set(fullPath, page);
     list.push(page);
@@ -240,10 +287,7 @@ async function buildPageTree(): Promise<PageTree> {
   return { byId, byPath, list };
 }
 
-/** Fetches (or returns the cached) full page tree, rebuilt on a TTL. */
-export async function getPageTree(): Promise<PageTree> {
-  const now = Date.now();
-  if (cache && cache.expires > now) return cache.tree;
+function refreshPageTree(): Promise<PageTree> {
   if (inflight) return inflight;
 
   const requestGeneration = generation;
@@ -262,6 +306,38 @@ export async function getPageTree(): Promise<PageTree> {
     });
 
   return inflight;
+}
+
+const EMPTY_TREE: PageTree = { byId: new Map(), byPath: new Map(), list: [] };
+
+/**
+ * Fetches (or returns the cached) full page tree, rebuilt on a TTL.
+ *
+ * Stale-while-revalidate, including at cold start: at catalog sizes in the
+ * thousands, a full rebuild (paginating every WP page, even with the
+ * lighter fields/concurrency above) can take long enough that no request
+ * should ever block on it — not even the very first one after a process
+ * restart. So this never awaits a rebuild itself: an expired cache is
+ * served while a fresh one rebuilds in the background, and if nothing has
+ * been built yet at all, an empty tree is handed back immediately while the
+ * first build kicks off behind it. Callers of this (homepage "latest
+ * pages", /airlines, /sitemap.xml, /llms.txt) already degrade gracefully to
+ * "nothing yet" rather than erroring on an empty tree, and it self-heals
+ * within one build cycle. Actual content edits still show up promptly via
+ * the publish webhook (see purgeCache()); this TTL is only the fallback.
+ * Individual content pages (the bulk of traffic) never depend on this at
+ * all — see getPageByPath.
+ */
+export async function getPageTree(): Promise<PageTree> {
+  const now = Date.now();
+  if (cache) {
+    if (cache.expires > now) return cache.tree;
+    void refreshPageTree().catch(() => {}); // failure surfaces to whichever caller (if any) awaits `inflight` directly next
+    return cache.tree;
+  }
+
+  void refreshPageTree().catch(() => {});
+  return EMPTY_TREE;
 }
 
 let postsCache: { posts: WPPost[]; expires: number } | null = null;
@@ -434,34 +510,180 @@ export async function submitComment(input: CommentSubmission): Promise<SubmitCom
   };
 }
 
-export async function getPageByPath(path: string): Promise<WPPage | undefined> {
-  const tree = await getPageTree();
-  return tree.byPath.get(normalizePath(path));
+interface AncestorLink {
+  id: number;
+  slug: string;
+  parent: number;
+  title: string;
 }
 
-export async function getChildren(parentId: number): Promise<WPPage[]> {
-  const tree = await getPageTree();
-  return tree.list
-    .filter((p) => p.parent === parentId)
-    .sort((a, b) => a.menuOrder - b.menuOrder || a.title.localeCompare(b.title));
+const ancestorLinkCache = new Map<number, { link: AncestorLink; expires: number }>();
+
+/** A single page's own {id,slug,parent,title} — the minimum needed to walk a
+ *  parent chain one hop at a time without pulling in the rest of the catalog. */
+async function fetchAncestorLink(id: number): Promise<AncestorLink | undefined> {
+  const now = Date.now();
+  const cached = ancestorLinkCache.get(id);
+  if (cached && cached.expires > now) return cached.link;
+
+  const res = await fetch(apiUrl(`/pages/${id}?_fields=id,slug,parent,title`), { headers: NO_CACHE_REQUEST_HEADERS });
+  if (!res.ok) return undefined;
+
+  const raw: { id: number; slug: string; parent: number; title: { rendered: string } } = await res.json();
+  const link: AncestorLink = { id: raw.id, slug: raw.slug, parent: raw.parent, title: he.decode(raw.title.rendered) };
+  ancestorLinkCache.set(id, { link, expires: now + PAGE_TREE_CACHE_TTL_MS });
+  return link;
 }
 
-export async function getSiblings(pageId: number): Promise<WPPage[]> {
-  const tree = await getPageTree();
-  const page = tree.byId.get(pageId);
-  if (!page) return [];
-  return tree.list
-    .filter((p) => p.parent === page.parent && p.id !== page.id)
+/** Walks a parent chain up to the root, root-first. `undefined` (rather than
+ *  a partial chain) if any link is broken — a parent id that no longer
+ *  resolves means the candidate below it isn't reachable at any URL, so the
+ *  caller should treat it the same as "this candidate doesn't match". */
+async function walkAncestors(parentId: number): Promise<AncestorLink[] | undefined> {
+  const chain: AncestorLink[] = [];
+  let currentId = parentId;
+  const seen = new Set<number>();
+
+  while (currentId) {
+    if (seen.has(currentId)) break; // guard against a corrupt/circular parent chain
+    seen.add(currentId);
+    const link = await fetchAncestorLink(currentId);
+    if (!link) return undefined;
+    chain.unshift(link);
+    currentId = link.parent;
+  }
+
+  return chain;
+}
+
+async function fetchPagesBySlug(slug: string): Promise<RawWPPage[]> {
+  const res = await fetch(
+    apiUrl(`/pages?slug=${encodeURIComponent(slug)}&_embed=wp:featuredmedia&_fields=${FULL_PAGE_FIELDS}`),
+    { headers: NO_CACHE_REQUEST_HEADERS },
+  );
+  if (!res.ok) {
+    throw new Error(`WP page fetch failed: ${res.status} ${res.statusText}`);
+  }
+  return res.json();
+}
+
+function toFullPage(p: RawWPPage, fullPath: string): WPPage {
+  return {
+    ...toSummary(p, fullPath),
+    content: p.content?.rendered ?? "",
+    yoast: p.yoast_head_json ?? null,
+    commentsOpen: p.comment_status === "open",
+  };
+}
+
+/**
+ * Resolves a request path directly against WordPress — a `?slug=` lookup
+ * for the leaf segment (usually one row, occasionally a handful if the slug
+ * is reused under different parents) plus a short walk up each candidate's
+ * `parent` chain to confirm which one actually matches the full path. Only
+ * ever a handful of REST calls, most of them served from the small
+ * ancestor-link cache above on repeat visits — unlike the old
+ * getPageTree()-backed lookup, this never depends on the size of the rest
+ * of the catalog.
+ */
+async function resolveByPath(normalized: string): Promise<{ raw: RawWPPage; ancestors: Breadcrumb[] } | undefined> {
+  const segments = normalized.split("/");
+  const leafSlug = segments[segments.length - 1];
+
+  const candidates = await fetchPagesBySlug(leafSlug);
+
+  for (const candidate of candidates) {
+    const ancestorLinks = candidate.parent ? await walkAncestors(candidate.parent) : [];
+    if (!ancestorLinks) continue;
+
+    const candidateFullPath = normalizePath([...ancestorLinks.map((a) => a.slug), candidate.slug].join("/"));
+    if (candidateFullPath !== normalized) continue;
+
+    let acc = "";
+    const ancestors: Breadcrumb[] = ancestorLinks.map((a) => {
+      acc = acc ? `${acc}/${a.slug}` : a.slug;
+      return { title: a.title, fullPath: acc };
+    });
+
+    return { raw: candidate, ancestors };
+  }
+
+  return undefined;
+}
+
+const resolvedPageCache = new Map<string, { resolved: ResolvedPage | null; expires: number }>();
+
+export async function getPageByPath(path: string): Promise<ResolvedPage | undefined> {
+  const normalized = normalizePath(path);
+  if (!normalized || RESERVED_SLUGS.has(normalized)) return undefined;
+
+  const now = Date.now();
+  const cached = resolvedPageCache.get(normalized);
+  if (cached && cached.expires > now) return cached.resolved ?? undefined;
+
+  const found = await resolveByPath(normalized);
+  const resolved: ResolvedPage | null = found
+    ? { page: toFullPage(found.raw, normalized), ancestors: found.ancestors }
+    : null;
+
+  resolvedPageCache.set(normalized, { resolved, expires: now + PAGE_TREE_CACHE_TTL_MS });
+  return resolved ?? undefined;
+}
+
+const childrenCache = new Map<number, { children: WPPageSummary[]; expires: number }>();
+
+async function fetchChildrenRaw(parentId: number): Promise<RawWPPage[]> {
+  const perPage = 100;
+  let page = 1;
+  let totalPages = 1;
+  const results: RawWPPage[] = [];
+
+  do {
+    const res = await fetch(
+      apiUrl(`/pages?parent=${parentId}&per_page=${perPage}&page=${page}&_embed=wp:featuredmedia&_fields=${SUMMARY_PAGE_FIELDS}`),
+      { headers: NO_CACHE_REQUEST_HEADERS },
+    );
+    if (!res.ok) {
+      throw new Error(`WP children fetch failed: ${res.status} ${res.statusText}`);
+    }
+    totalPages = Number(res.headers.get("X-WP-TotalPages") ?? "1");
+    results.push(...(await res.json()));
+    page += 1;
+  } while (page <= totalPages);
+
+  return results;
+}
+
+/**
+ * Direct children of one page — queried from WP scoped to that parent
+ * (`?parent=`) rather than filtered out of the whole-site tree, so the cost
+ * is proportional to the size of this one section, not the catalog. Used
+ * both for a section's own directory listing (ParentPageLayout) and,
+ * filtered/capped by the caller, for a child page's sibling list
+ * (ChildPageLayout).
+ */
+export async function getChildren(parent: { id: number; fullPath: string }): Promise<WPPageSummary[]> {
+  const now = Date.now();
+  const cached = childrenCache.get(parent.id);
+  if (cached && cached.expires > now) return cached.children;
+
+  const raw = await fetchChildrenRaw(parent.id);
+  const children = raw
+    .map((p) => toSummary(p, normalizePath(`${parent.fullPath}/${p.slug}`)))
     .sort((a, b) => a.menuOrder - b.menuOrder || a.title.localeCompare(b.title));
+
+  childrenCache.set(parent.id, { children, expires: now + PAGE_TREE_CACHE_TTL_MS });
+  return children;
 }
 
 /**
  * Every page using a WP template ending in `suffix` (e.g. "airlines-parent.php"),
  * regardless of where it sits in the hierarchy — for directory-style listing
- * pages like /airlines. Reuses the same suffix-matching convention as the
- * layout picker in [...slug].astro.
+ * pages like /airlines. This one genuinely needs to scan the whole catalog
+ * (there's no WP-side way to filter pages by template), so it stays backed
+ * by the shared, TTL/SWR-cached getPageTree() rather than a per-request fetch.
  */
-export async function getPagesByTemplateSuffix(suffix: string): Promise<WPPage[]> {
+export async function getPagesByTemplateSuffix(suffix: string): Promise<WPPageSummary[]> {
   const tree = await getPageTree();
   const needle = suffix.toLowerCase();
   return tree.list
@@ -485,18 +707,6 @@ export function isChildTemplate(template: string): boolean {
   return /(?:^|[-/])child-page-template\.php$/i.test(template);
 }
 
-/** The resolved ancestor chain for breadcrumbs, root first. */
-export function getAncestorChain(page: WPPage, tree: PageTree): WPPage[] {
-  const chain: WPPage[] = [];
-  const segments = page.fullPath.split("/");
-  for (let i = 0; i < segments.length - 1; i++) {
-    const ancestorPath = segments.slice(0, i + 1).join("/");
-    const ancestor = tree.byPath.get(ancestorPath);
-    if (ancestor) chain.push(ancestor);
-  }
-  return chain;
-}
-
 let siteSettingsCache: { settings: SiteSettings; expires: number } | null = null;
 
 export async function getSiteSettings(): Promise<SiteSettings> {
@@ -516,17 +726,27 @@ export async function getSiteSettings(): Promise<SiteSettings> {
 }
 
 /**
- * Drops the in-memory page-tree, site-settings, and posts caches so the very
- * next request rebuilds fresh from WordPress, instead of waiting out the TTL
- * above. Called from the /api/revalidate webhook (see
+ * Invalidates every in-memory cache so WordPress edits show up promptly
+ * instead of waiting out a TTL. Called from the /api/revalidate webhook (see
  * wordpress/rest-api-additions.php), which WP pings on publish/update/trash
  * for both pages and posts. The TTL stays in place as a fallback in case the
  * webhook never fires.
+ *
+ * The page tree is marked expired rather than nulled out (unlike the
+ * smaller per-page/per-section caches below it, which are cheap enough to
+ * just drop): with a large catalog, forcing the very next request after
+ * every publish to block on a full rebuild would just reintroduce the
+ * latency spike this cache exists to avoid. getPageTree()'s
+ * stale-while-revalidate path serves the (momentarily stale) tree instead
+ * and refreshes it in the background.
  */
 export function purgeCache(): void {
-  cache = null;
+  if (cache) cache.expires = 0;
   siteSettingsCache = null;
   postsCache = null;
+  resolvedPageCache.clear();
+  childrenCache.clear();
+  ancestorLinkCache.clear();
   generation += 1;
 }
 

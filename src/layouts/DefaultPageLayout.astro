@@ -2,17 +2,15 @@
 import BaseLayout from "./BaseLayout.astro";
 import Breadcrumbs from "../components/Breadcrumbs.astro";
 import FeaturedImage from "../components/FeaturedImage.astro";
-import type { WPPage, PageTree, ResolvedPageMeta } from "../lib/wp";
-import { getAncestorChain } from "../lib/wp";
+import type { WPPage, Breadcrumb, ResolvedPageMeta } from "../lib/wp";
 
 interface Props {
   page: WPPage;
-  tree: PageTree;
+  ancestors: Breadcrumb[];
   meta: ResolvedPageMeta;
 }
 
-const { page, tree, meta } = Astro.props;
-const ancestors = getAncestorChain(page, tree);
+const { page, ancestors, meta } = Astro.props;
 
 const breadcrumbItems = [
   ...ancestors.map((ancestor) => ({ label: ancestor.title, href: `/${ancestor.fullPath}` })),

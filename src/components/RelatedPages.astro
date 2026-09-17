@@ -1,10 +1,10 @@
 ---
-import type { WPPage } from "../lib/wp";
+import type { WPPageSummary } from "../lib/wp";
 import FeaturedImage from "./FeaturedImage.astro";
 
 interface Props {
   /** This parent page's direct children — rendered as a thumbnail + title card grid. */
-  pages: WPPage[];
+  pages: WPPageSummary[];
 }
 
 const { pages } = Astro.props;

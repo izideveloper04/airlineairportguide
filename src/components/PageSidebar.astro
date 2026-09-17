@@ -1,9 +1,9 @@
 ---
-import type { WPPage } from "../lib/wp";
+import type { WPPageSummary } from "../lib/wp";
 
 interface Props {
   /** This child page's siblings, already filtered to *-child.php templates by the caller. */
-  pages: WPPage[];
+  pages: WPPageSummary[];
 }
 
 const { pages } = Astro.props;

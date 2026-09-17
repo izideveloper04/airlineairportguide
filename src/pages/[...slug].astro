@@ -6,7 +6,7 @@
 // rebuild/redeploy step at all.
 export const prerender = false;
 
-import { getPageTree, getPageByPath, getSiteSettings, resolvePageMeta, isParentTemplate, isChildTemplate } from "../lib/wp";
+import { getPageByPath, getSiteSettings, resolvePageMeta, isParentTemplate, isChildTemplate } from "../lib/wp";
 import ParentPageLayout from "../layouts/ParentPageLayout.astro";
 import ChildPageLayout from "../layouts/ChildPageLayout.astro";
 import DefaultPageLayout from "../layouts/DefaultPageLayout.astro";
@@ -20,13 +20,13 @@ import DefaultPageLayout from "../layouts/DefaultPageLayout.astro";
 Astro.response.headers.set("Cache-Control", "no-store");
 
 const requestedPath = Astro.params.slug ?? "";
-const page = await getPageByPath(Array.isArray(requestedPath) ? requestedPath.join("/") : requestedPath);
+const resolved = await getPageByPath(Array.isArray(requestedPath) ? requestedPath.join("/") : requestedPath);
 
-if (!page) {
+if (!resolved) {
   return Astro.rewrite("/404");
 }
 
-const tree = await getPageTree();
+const { page, ancestors } = resolved;
 const siteSettings = await getSiteSettings();
 const meta = resolvePageMeta(page, siteSettings);
 
@@ -51,4 +51,4 @@ const Layout = isParentTemplate(page.template)
     : DefaultPageLayout;
 ---
 
-<Layout page={page} tree={tree} meta={meta} />
+<Layout page={page} ancestors={ancestors} meta={meta} />

@@ -4,27 +4,31 @@ import Breadcrumbs from "../components/Breadcrumbs.astro";
 import PageSidebar from "../components/PageSidebar.astro";
 import FeaturedImage from "../components/FeaturedImage.astro";
 import CommentSection from "../components/CommentSection.astro";
-import type { WPPage, PageTree, ResolvedPageMeta } from "../lib/wp";
-import { getAncestorChain, getSiblings, isChildTemplate, getApprovedComments } from "../lib/wp";
+import type { WPPage, Breadcrumb, ResolvedPageMeta } from "../lib/wp";
+import { getChildren, isChildTemplate, getApprovedComments } from "../lib/wp";
 import { supportPhone } from "../lib/config";
 
 interface Props {
   page: WPPage;
-  tree: PageTree;
+  ancestors: Breadcrumb[];
   meta: ResolvedPageMeta;
 }
 
-const { page, tree, meta } = Astro.props;
-const ancestors = getAncestorChain(page, tree);
+const { page, ancestors, meta } = Astro.props;
+// The direct parent is always the last ancestor (root-first order) — a
+// top-level page (no ancestors) has no parent section to pull siblings from.
+const parent = ancestors.at(-1);
 // Siblings under the same parent are already expected to share the child
 // template by convention, but filter explicitly so the sidebar only ever
 // shows *-child.php pages even if a sibling is ever assigned something else.
 // Newest-published first, capped at 12 — this list has no natural size
 // limit otherwise (it grows with every *-child.php page published).
-const siblings = (await getSiblings(page.id))
-  .filter((sibling) => isChildTemplate(sibling.template))
-  .sort((a, b) => b.date.localeCompare(a.date))
-  .slice(0, 12);
+const siblings = parent
+  ? (await getChildren({ id: page.parent, fullPath: parent.fullPath }))
+      .filter((sibling) => sibling.id !== page.id && isChildTemplate(sibling.template))
+      .sort((a, b) => b.date.localeCompare(a.date))
+      .slice(0, 12)
+  : [];
 const comments = await getApprovedComments(page.id);
 
 const breadcrumbItems = [
