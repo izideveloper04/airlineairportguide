@@ -478,11 +478,11 @@ export async function getPagesByTemplateSuffix(suffix: string): Promise<WPPage[]
  * siblings) share one definition instead of duplicating the regex.
  */
 export function isParentTemplate(template: string): boolean {
-  return /(?:^|[-/])parent\.php$/i.test(template);
+  return /(?:^|[-/])parent-page-template\.php$/i.test(template);
 }
 
 export function isChildTemplate(template: string): boolean {
-  return /(?:^|[-/])child\.php$/i.test(template);
+  return /(?:^|[-/])child-page-template\.php$/i.test(template);
 }
 
 /** The resolved ancestor chain for breadcrumbs, root first. */
