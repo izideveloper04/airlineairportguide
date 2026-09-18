@@ -4,6 +4,8 @@ import Breadcrumbs from "../components/Breadcrumbs.astro";
 import RelatedPages from "../components/RelatedPages.astro";
 import type { WPPage, Breadcrumb, ResolvedPageMeta } from "../lib/wp";
 import { getChildren } from "../lib/wp";
+import type { WPPageSummary } from "../lib/wp";
+import FeaturedImage from "./FeaturedImage.astro";
 
 interface Props {
   page: WPPage;

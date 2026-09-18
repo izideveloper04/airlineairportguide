@@ -99,11 +99,8 @@ const postDateFormatter = new Intl.DateTimeFormat("en-US", { dateStyle: "long" }
           </svg>
           <div class="usp-card-title">
             <h3>Verified Airline Information</h3>
-            <span class="usp-arrow" aria-hidden="true">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
-            </span>
           </div>
-          <p>Useful airline details organized with accuracy, clarity, and the passenger in mind.</p>
+          <p class="text-center">Useful airline details organized with accuracy, clarity, and the passenger in mind.</p>
         </div>
         <div class="usp-card">
           <svg class="usp-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
@@ -112,11 +109,8 @@ const postDateFormatter = new Intl.DateTimeFormat("en-US", { dateStyle: "long" }
           </svg>
           <div class="usp-card-title">
             <h3>Global Office Directory</h3>
-            <span class="usp-arrow" aria-hidden="true">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
-            </span>
           </div>
-          <p>Explore airline offices and details across a broad network of international destinations.</p>
+          <p class="text-center">Explore airline offices and details across a broad network of international destinations.</p>
         </div>
         <div class="usp-card">
           <svg class="usp-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
@@ -125,11 +119,8 @@ const postDateFormatter = new Intl.DateTimeFormat("en-US", { dateStyle: "long" }
           </svg>
           <div class="usp-card-title">
             <h3>Built for Quick Searches</h3>
-            <span class="usp-arrow" aria-hidden="true">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
-            </span>
           </div>
-          <p>Find the details you came for without wading through unnecessary information.</p>
+          <p class="text-center">Find the details you came for without wading through unnecessary information.</p>
         </div>
       </div>
     </div>
@@ -159,7 +150,7 @@ const postDateFormatter = new Intl.DateTimeFormat("en-US", { dateStyle: "long" }
           ))}
         </div>
       ) : (
-        <p class="text-center" style="color:#667085">No pages have been published yet.</p>
+        <p class="text-center" style="color:var(--muted)">No pages have been published yet.</p>
       )}
     </div>
   </section>

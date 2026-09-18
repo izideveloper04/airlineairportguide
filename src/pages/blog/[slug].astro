@@ -6,7 +6,8 @@ export const prerender = false;
 
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import Breadcrumbs from "../../components/Breadcrumbs.astro";
-import { getPostBySlug, getSiteSettings, resolvePageMeta } from "../../lib/wp";
+import PostSidebar from "../../components/PostSidebar.astro";
+import { getPostBySlug, getPosts, getSiteSettings, resolvePageMeta } from "../../lib/wp";
 import FeaturedImage from "../../components/FeaturedImage.astro";
 
 Astro.response.headers.set("Cache-Control", "no-store");
@@ -20,6 +21,11 @@ if (!post) {
 
 const siteSettings = await getSiteSettings();
 const meta = resolvePageMeta(post, siteSettings);
+
+// Sidebar list of other posts — same "capped, newest first, excludes self"
+// convention ChildPageLayout uses for its sibling-pages sidebar.
+const allPosts = await getPosts();
+const otherPosts = allPosts.filter((p) => p.slug !== post.slug).slice(0, 10);
 
 const dateFormatter = new Intl.DateTimeFormat("en-US", { dateStyle: "long" });
 ---
@@ -43,15 +49,19 @@ const dateFormatter = new Intl.DateTimeFormat("en-US", { dateStyle: "long" });
     </div>
   </div>
 
-  <article>
-    <FeaturedImage
-      src={post.featuredImage}
-      eager
-      width={896}
-      height={256}
-      class="w-full h-64 object-cover rounded-md border border-[var(--line)] mb-6"
-    />
-    <div class="prose" set:html={post.content} />
-  </article>
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+    <article class="md:col-span-2">
+      <FeaturedImage
+        src={post.featuredImage}
+        eager
+        width={896}
+        height={256}
+        class="w-full h-64 object-cover rounded-md border border-[var(--line)] mb-6"
+      />
+      <div class="prose" set:html={post.content} />
+    </article>
+    <PostSidebar posts={otherPosts} />
+  </div>
+
   <p class="mt-8"><a href="/blog" class="text-brand underline">← Back to Blog</a></p>
 </BaseLayout>

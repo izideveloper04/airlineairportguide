@@ -2,64 +2,61 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Self-hosted, not the Google Fonts CDN. One weight-range variable font per
-   family — no separate static-weight files needed. Jost for headings
-   (h1-h6, see the @layer base rule below), Outfit for everything else. */
+/* Self-hosted variable fonts. Bricolage Grotesque for headings, Manrope for
+   everything else. Drop the two .woff2 files in src/assets/fonts/. */
 @font-face {
-  font-family: "Jost";
-  src: url("../assets/fonts/jost-variable.woff2") format("woff2");
-  font-weight: 400 800;
+  font-family: "Bricolage Grotesque";
+  src: url("../assets/fonts/bricolage-grotesque-variable.woff2") format("woff2");
+  font-weight: 300 800;
   font-style: normal;
   font-display: swap;
 }
 @font-face {
-  font-family: "Outfit";
-  src: url("../assets/fonts/outfit-variable.woff2") format("woff2");
-  font-weight: 400 700;
+  font-family: "Manrope";
+  src: url("../assets/fonts/manrope-variable.woff2") format("woff2");
+  font-weight: 300 800;
   font-style: normal;
   font-display: swap;
 }
 
 @layer base {
   :root {
-    /* Matches the logo's blue exactly (#1264d8) - the one brand blue used
-       everywhere on the site, buttons included. */
-    --brand: #1264d8;
-    --brand-dark: #0d4fae;
-    --brand-tint: #e7f0fc;
-    --ink: #171717;
-    --line: #e2e2e2;
-    --surface: #f7f7f7;
+    --brand: #10605a;
+    --brand-dark: #0a423d;
+    --brand-tint: #e4f0ed;
+    --accent: #d99a2b;
+    --accent-ink: #8a5a06;
+    --accent-soft: #fbf1dd;
 
-    /* One radius scale for the whole site: listing cards/panels at
-       --radius-card, interactive controls (buttons/inputs) at
-       --radius-control. Nothing outside these two values. */
-    --radius-card: 12px;
-    --radius-control: 8px;
+    --ink: #14211f;
+    --muted: #5e6c69;
+    --line: #e1e7e4;
+    --surface: #f2f5f3;
 
-    /* Shadows tinted toward ink instead of pure black, resting vs. hover. */
-    --shadow-card: 0 1px 2px rgba(15, 23, 42, 0.04), 0 1px 3px rgba(15, 23, 42, 0.06);
-    --shadow-card-hover: 0 16px 28px -12px rgba(15, 23, 42, 0.22);
-    --shadow-float: 0 20px 40px -16px rgba(15, 23, 42, 0.28);
+    --radius-card: 14px;
+    --radius-control: 999px;
+
+    --shadow-card: 0 1px 2px rgba(12, 42, 38, 0.05), 0 1px 3px rgba(12, 42, 38, 0.06);
+    --shadow-card-hover: 0 18px 30px -14px rgba(12, 42, 38, 0.28);
+    --shadow-float: 0 22px 44px -18px rgba(12, 42, 38, 0.32);
   }
 
   body {
     background: #fff;
     color: var(--ink);
-    font-family: "Outfit", ui-sans-serif, system-ui, sans-serif;
+    font-family: "Manrope", ui-sans-serif, system-ui, sans-serif;
+    letter-spacing: -0.005em;
   }
 
-  /* Every heading sitewide, including ones rendered from raw WP content
-     (.prose h1-h4) - a tag selector instead of a utility class so nothing
-     has to remember to opt in per-component. */
   h1, h2, h3, h4, h5, h6 {
-    font-family: "Jost", ui-sans-serif, system-ui, sans-serif;
+    font-family: "Bricolage Grotesque", ui-sans-serif, system-ui, sans-serif;
+    letter-spacing: -0.02em;
   }
 
   a:focus-visible,
   button:focus-visible,
   input:focus-visible {
-    outline: 2px solid var(--brand);
+    outline: 2px solid var(--accent);
     outline-offset: 2px;
   }
 
@@ -77,8 +74,6 @@
 }
 
 @layer components {
-  /* Search box — used on the homepage and /airlines. Icon is decorative;
-     the label element still carries the accessible name. */
   .search-form {
     display: flex;
     gap: 0.6rem;
@@ -91,27 +86,33 @@
   }
   .search-form__field svg {
     position: absolute;
-    left: 0.85rem;
+    left: 1rem;
     top: 50%;
     transform: translateY(-50%);
     width: 18px;
     height: 18px;
-    color: #9ca3af;
+    color: var(--muted);
     pointer-events: none;
   }
   .search-form input {
     width: 100%;
-    padding: 0.75rem 1rem 0.75rem 2.6rem;
+    padding: 0.8rem 1.1rem 0.8rem 2.75rem;
     border: 1px solid var(--line);
     border-radius: var(--radius-control);
+    background: var(--surface);
     font-size: 0.95rem;
+    transition: border-color 0.15s ease, background-color 0.15s ease;
+  }
+  .search-form input:focus {
+    background: #fff;
+    border-color: var(--brand);
   }
   .search-form button {
-    padding: 0.75rem 1.4rem;
+    padding: 0.8rem 1.6rem;
     background: var(--brand);
     color: #fff;
     border-radius: var(--radius-control);
-    font-weight: 600;
+    font-weight: 700;
     font-size: 0.9rem;
     white-space: nowrap;
     transition: background-color 0.15s ease, transform 0.1s ease;
@@ -123,8 +124,8 @@
     transform: scale(0.98);
   }
 
-  /* Generic listing card + grid, reused for directory listings and blog
-     posts across the homepage, /airlines, and section directory pages. */
+  /* Generic listing card + grid — used for the /blog listing (with a photo)
+     and the /airlines listing (text only, no .card__media). */
   .card-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
@@ -141,10 +142,6 @@
     box-shadow: var(--shadow-card);
     transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
   }
-  /* `.card { display: block }` above is an author rule and always beats the
-     browser's built-in `[hidden] { display: none }` UA rule regardless of
-     specificity, so the directory filter script's `card.hidden = true`
-     silently did nothing without this override. */
   .card[hidden] {
     display: none;
   }
@@ -152,7 +149,7 @@
   article.card:hover {
     transform: translateY(-3px);
     box-shadow: var(--shadow-card-hover);
-    border-color: var(--line);
+    border-color: #cfdcd8;
   }
   .card__media {
     display: block;
@@ -166,12 +163,37 @@
     display: block;
   }
 
-  /* Stand-in for a missing WP featured image (FeaturedImage.astro) - an
-     inline SVG on a soft brand-tinted background instead of a fallback
-     photo, so pages/cards with no image set don't each cost an extra
-     request. Fills whatever box it's placed in (card media, page-card
-     image, hero banner, ...) so layout never shifts based on whether a
-     photo is set. */
+  /* Row layout only when a card actually wraps a photo (the /blog listing).
+     Text-only cards (/airlines) have no .card__media, so :has() leaves them
+     exactly as they were — stacked, no grid, no image column. */
+  .card-grid:has(.card__media) {
+    grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+    gap: 1.5rem;
+  }
+  .card:has(.card__media) {
+    display: grid;
+    grid-template-columns: 136px 1fr;
+  }
+  .card:has(.card__media) .card__media {
+    aspect-ratio: 1 / 1;
+    width: 100%;
+    height: 100%;
+  }
+  .card:has(.card__media) .card__body {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 1rem 1.2rem;
+  }
+  @media (max-width: 480px) {
+    .card:has(.card__media) {
+      grid-template-columns: 1fr;
+    }
+    .card:has(.card__media) .card__media {
+      aspect-ratio: 16 / 9;
+    }
+  }
+
   .img-placeholder {
     width: 100%;
     height: 100%;
@@ -191,11 +213,13 @@
   }
   .card__kicker {
     font-size: 0.75rem;
-    font-weight: 600;
-    color: var(--brand);
-    margin: 0 0 0.2rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    color: var(--accent-ink);
+    margin: 0 0 0.25rem;
   }
   .card__title {
+    font-family: "Bricolage Grotesque", ui-sans-serif, system-ui, sans-serif;
     font-weight: 600;
     font-size: 1rem;
     margin: 0;
@@ -206,11 +230,11 @@
   }
   .card__meta {
     font-size: 0.8rem;
-    color: #666;
+    color: var(--muted);
   }
   .card__excerpt {
     font-size: 0.875rem;
-    color: #444;
+    color: var(--muted);
     margin-top: 0.4rem;
   }
   .card__excerpt p {
@@ -219,7 +243,7 @@
   .card__cta {
     display: inline-block;
     font-size: 0.85rem;
-    font-weight: 600;
+    font-weight: 700;
     color: var(--brand);
     margin-top: 0.5rem;
   }
@@ -241,9 +265,9 @@
     display: inline-flex;
     align-items: center;
     gap: 0.4rem;
-    padding: 0.6rem 1.2rem;
+    padding: 0.6rem 1.4rem;
     border-radius: var(--radius-control);
-    font-weight: 600;
+    font-weight: 700;
     font-size: 0.9rem;
     transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
   }
@@ -263,10 +287,9 @@
     color: var(--brand);
   }
 
-  /* Small pill link used for "View all" style section actions. */
   .view-all {
     font-size: 0.85rem;
-    font-weight: 600;
+    font-weight: 700;
     color: var(--brand);
     white-space: nowrap;
   }
@@ -274,11 +297,8 @@
     text-decoration: underline;
   }
 
-  /* Child-page hero (ChildPageLayout) — breadcrumb + title on the left,
-     a "Call Now" card on the right. Plain two-column row (not full-bleed
-     like the homepage hero); sits inside the same contained <main> every
-     other page uses. */
   .page-hero {
+    position: relative;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -288,30 +308,40 @@
     margin-bottom: 28px;
     border-bottom: 1px solid var(--line);
   }
+  .page-hero::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: -2px;
+    width: 64px;
+    height: 3px;
+    border-radius: 2px;
+    background: var(--accent);
+  }
   .page-hero__main {
     flex: 1 1 320px;
     min-width: 0;
   }
   .page-hero__title {
     font-size: clamp(1.5rem, 1.2rem + 1.2vw, 2.25rem);
-    font-weight: 800;
-    line-height: 1.15;
-    letter-spacing: -0.02em;
+    font-weight: 700;
+    line-height: 1.12;
+    letter-spacing: -0.03em;
   }
 
   .call-card {
     flex: 0 0 auto;
     width: 100%;
     max-width: 340px;
-    background: #fff;
-    border-radius: 14px;
+    background: var(--surface);
+    border-radius: var(--radius-card);
     padding: 24px 28px;
-    box-shadow: var(--shadow-float);
+    box-shadow: none;
     text-align: center;
     margin: 0 auto;
-    border: solid 1px var(--brand-tint);
-}
-  .call-card  .call-card__heading {
+    border: 1px solid var(--line);
+  }
+  .call-card .call-card__heading {
     font-size: 1.1rem;
     font-weight: 700;
     margin-bottom: 14px;
@@ -323,7 +353,7 @@
     gap: 10px;
     background: var(--brand);
     color: #fff;
-    border-radius: 6px;
+    border-radius: var(--radius-control);
     padding: 12px 20px;
     font-weight: 700;
     font-size: 1.05rem;
@@ -341,7 +371,7 @@
   .call-card__note {
     margin-top: 14px;
     font-size: 0.85rem;
-    color: #667085;
+    color: var(--muted);
     line-height: 1.5;
   }
 
@@ -351,19 +381,18 @@
     }
   }
 
-  /* Sidebar "In this section" nav — driven by ChildPageLayout's sibling
-     query (see src/lib/wp.ts), this is presentation only. */
   .side-nav {
     border: 1px solid var(--line);
     border-radius: var(--radius-card);
+    background: var(--surface);
     padding: 1rem;
   }
   .side-nav__title {
     font-size: 0.75rem;
     font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 0.04em;
-    color: #666;
+    letter-spacing: 0.06em;
+    color: var(--accent-ink);
     margin-bottom: 0.6rem;
   }
   .side-nav__list {
@@ -375,12 +404,12 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 0.45rem 0.5rem;
-    border-radius: 6px;
+    padding: 0.45rem 0.6rem;
+    border-radius: 8px;
     font-size: 0.9rem;
   }
   .side-nav__link:hover {
-    background: var(--surface);
+    background: #fff;
     color: var(--brand);
   }
   .side-nav__link svg {
@@ -390,11 +419,6 @@
     opacity: 0.5;
   }
 
-  /* Homepage hero — full-width background photo with a dark scrim so the
-     heading stays readable regardless of the photo underneath. The search
-     box lives in .search-card just below, overlapping the hero's bottom
-     edge (the familiar "search over photo" listings-site pattern) rather
-     than sitting inside the photo itself. */
   .hero-photo {
     position: relative;
     isolation: isolate;
@@ -419,7 +443,7 @@
     position: absolute;
     inset: 0;
     z-index: -1;
-    background: linear-gradient(180deg, rgba(10, 12, 20, 0.5) 0%, rgba(10, 12, 20, 0.65) 100%);
+    background: linear-gradient(180deg, rgba(8, 30, 28, 0.5) 0%, rgba(8, 30, 28, 0.72) 100%);
   }
   .hero-photo__inner {
     max-width: 38rem;
@@ -428,8 +452,8 @@
   .hero-photo h1 {
     font-size: clamp(1.75rem, 1.4rem + 1.6vw, 2.5rem);
     font-weight: 700;
-    line-height: 1.2;
-    letter-spacing: -0.01em;
+    line-height: 1.15;
+    letter-spacing: -0.03em;
     margin-bottom: 0.75rem;
   }
   .hero-photo p {
@@ -437,7 +461,6 @@
     margin: 0;
   }
 
-  /* Search card — pulled up over the hero photo's bottom edge. */
   .search-card {
     position: relative;
     z-index: 2;
@@ -456,11 +479,10 @@
   .hero-stat {
     text-align: center;
     font-size: 0.85rem;
-    color: #666;
+    color: var(--muted);
     margin-top: 1.1rem;
   }
 
-  /* Icon + heading + subheading cards (homepage "why us" row). */
   .icon-card-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -498,8 +520,8 @@
   }
   .icon-card__desc {
     font-size: 0.9rem;
-    color: #666;
-    line-height: 1.5;
+    color: var(--muted);
+    line-height: 1.55;
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -511,28 +533,27 @@
     }
   }
 
-  /* Typography for WordPress block-editor HTML rendered via set:html. */
   .prose {
-    max-width: 70ch;
+    max-width: 72ch;
   }
   .prose iframe {
     width: 100%;
   }
   .prose :is(h1, h2, h3, h4) {
     font-weight: 700;
-    margin-top: 1.6em;
+    margin-top: 1.7em;
     margin-bottom: 0.5em;
-    line-height: 1.3;
+    line-height: 1.25;
   }
   .prose h2 {
-    font-size: 1.4rem;
+    font-size: 1.45rem;
   }
   .prose h3 {
     font-size: 1.15rem;
   }
   .prose p {
     margin: 1em 0;
-    line-height: 1.7;
+    line-height: 1.75;
   }
   .prose ul,
   .prose ol {
@@ -545,18 +566,19 @@
   .prose a {
     color: var(--brand);
     text-decoration: underline;
+    text-underline-offset: 2px;
   }
   .prose img {
     max-width: 100%;
     height: auto;
-    border-radius: 6px;
+    border-radius: var(--radius-card);
     margin: 1.2em 0;
   }
   .prose blockquote {
-    border-left: 3px solid var(--line);
+    border-left: 3px solid var(--accent);
     padding-left: 1em;
-    color: #555;
-    font-style: italic;
+    color: var(--muted);
+    font-style: normal;
     margin: 1.2em 0;
   }
   .prose table {
@@ -567,25 +589,25 @@
   .prose th,
   .prose td {
     border: 1px solid var(--line);
-    padding: 0.5em 0.75em;
+    padding: 0.55em 0.8em;
     text-align: left;
   }
+  .prose th {
+    background: var(--surface);
+  }
 
-  /* Public comment thread + submission form on child pages — see
-     src/components/CommentSection.astro. Comments are sourced from and
-     moderated entirely in the WordPress dashboard (src/lib/wp.ts's
-     getApprovedComments/submitComment); nothing here controls approval. */
   .comments {
     margin-top: 3rem;
     padding: 2rem;
     border: 1px solid var(--line);
+    border-radius: var(--radius-card);
   }
   .comments__heading {
     font-size: 1.3rem;
     margin-bottom: 1rem;
   }
   .comments__empty {
-    color: #667085;
+    color: var(--muted);
     font-size: 0.95rem;
     margin-bottom: 1.5rem;
   }
@@ -611,12 +633,12 @@
     font-size: 0.95rem;
   }
   .comment__date {
-    color: #667085;
+    color: var(--muted);
     font-size: 0.8rem;
   }
   .comment__body {
     font-size: 0.95rem;
-    line-height: 1.6;
+    line-height: 1.65;
   }
   .comment__body p {
     margin: 0.5em 0;
@@ -639,20 +661,24 @@
   }
   .comment-form__row label {
     font-size: 0.85rem;
-    font-weight: 600;
+    font-weight: 700;
   }
   .comment-form__row input,
   .comment-form__row textarea {
     border: 1px solid var(--line);
-    border-radius: var(--radius-control);
-    padding: 0.6rem 0.75rem;
+    border-radius: 10px;
+    background: var(--surface);
+    padding: 0.65rem 0.8rem;
     font: inherit;
+  }
+  .comment-form__row input:focus,
+  .comment-form__row textarea:focus {
+    background: #fff;
+    border-color: var(--brand);
   }
   .comment-form__row textarea {
     resize: vertical;
   }
-  /* Honeypot: present in the DOM (so bots that read markup fill it) but
-     invisible and unreachable by keyboard/AT for real visitors. */
   .comment-form__hp {
     position: absolute;
     width: 1px;
@@ -666,11 +692,11 @@
     align-items: center;
     justify-content: center;
     min-height: 44px;
-    padding: 0 24px;
+    padding: 0 26px;
     border-radius: var(--radius-control);
     background: var(--brand);
     color: #fff;
-    font-weight: 600;
+    font-weight: 700;
     font-size: 0.95rem;
   }
   .comment-form button[type="submit"]:hover {
@@ -692,33 +718,527 @@
   }
 }
 
+.container {
+  width: min(1200px, calc(100% - 40px));
+  margin: 0 auto;
+}
 
+/* ============================ BUTTONS ============================ */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  padding: 0 30px;
+  border-radius: var(--radius-control);
+  font-size: 15px;
+  font-weight: 700;
+  transition: all 0.25s ease;
+}
+.btn-primary {
+  background: var(--brand);
+  color: #ffffff;
+}
+.btn-primary:hover {
+  background: var(--brand-dark);
+  transform: translateY(-2px);
+}
+.btn-outline {
+  border: 1px solid #ffffff;
+  color: #ffffff;
+}
+.btn-outline:hover {
+  background: #ffffff;
+  color: var(--ink);
+}
 
+/* ============================ HERO ============================ */
+.hero {
+  position: relative;
+  height: 450px;
+  display: flex;
+  align-items: center;
+  background-size: cover;
+  background-position: center;
+  color: #ffffff;
+}
+.hero-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(105deg, rgba(6, 26, 24, 0.82) 0%, rgba(6, 26, 24, 0.5) 100%);
+}
+.hero-content {
+  position: relative;
+  z-index: 1;
+  padding: 90px 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 48px;
+  flex-wrap: wrap;
+}
+.hero-text {
+  max-width: 640px;
+}
+.hero-eyebrow,
+.section-eyebrow {
+  display: block;
+  margin-bottom: 12px;
+  color: var(--accent-ink);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 1.6px;
+}
+.hero-eyebrow {
+  color: var(--accent);
+}
+.hero h1 {
+  max-width: 780px;
+  margin-bottom: 20px;
+  font-size: clamp(42px, 6vw, 54px);
+  line-height: 1.04;
+  letter-spacing: -2.2px;
+}
+.hero p {
+  max-width: 650px;
+  margin-bottom: 32px;
+  color: rgba(255, 255, 255, 0.88);
+  font-size: 18px;
+  line-height: 1.6;
+}
+.hero-search-card {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 400px;
+  background: #ffffff;
+  border-radius: 18px;
+  padding: 32px 28px;
+  box-shadow: var(--shadow-float);
+  color: var(--ink);
+}
+.hero-search-card h2 {
+  margin-bottom: 20px;
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: -0.6px;
+}
+.hero-search-card .search-form {
+  max-width: none;
+}
+.hero-search-card .btn {
+  width: 100%;
+  margin-top: 16px;
+}
 
-.container { width: min(1200px, calc(100% - 40px)); margin: 0 auto; } /* ========================================= BUTTONS ========================================= */ .btn { display: inline-flex; align-items: center; justify-content: center; min-height: 48px; padding: 0 28px; border-radius: 6px; font-size: 15px; font-weight: 600; transition: all 0.25s ease; } .btn-primary { background: var(--brand); color: #ffffff; } .btn-primary:hover { background: var(--brand-dark); transform: translateY(-2px); } .btn-outline { border: 1px solid #ffffff; color: #ffffff; } .btn-outline:hover { background: #ffffff; color: #172033; } /* ========================================= HERO SECTION ========================================= */ .hero { position: relative; height: 450px; display: flex; align-items: center; background-size: cover; background-position: center; color: #ffffff; } .hero-overlay { position: absolute; inset: 0; background: rgba(5, 20, 40, 0.58); } .hero-content { position: relative; z-index: 1; padding: 90px 0; display: flex; align-items: center; justify-content: space-between; gap: 48px; flex-wrap: wrap; } .hero-text { max-width: 640px; } .hero-eyebrow, .section-eyebrow { display: block; margin-bottom: 12px; color: var(--brand); font-size: 14px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; } .hero-eyebrow { color: #ffffff; } .hero h1 { max-width: 780px; margin-bottom: 20px; font-size: clamp(42px, 6vw, 52px); line-height: 1.08; letter-spacing: -2px; } .hero p { max-width: 650px; margin-bottom: 32px; color: rgba(255, 255, 255, 0.9); font-size: 18px; } .hero-search-card { position: relative; z-index: 1; width: 100%; max-width: 400px; background: #ffffff; border-radius: 14px; padding: 32px 28px; box-shadow: 0 25px 60px rgba(10, 20, 40, 0.35); color: var(--ink); } .hero-search-card h2 { margin-bottom: 20px; font-size: 24px; font-weight: 700; letter-spacing: -0.5px; } .hero-search-card .search-form { max-width: none; } .hero-search-card .btn { width: 100%; margin-top: 16px; }
-/* ========================================= USP SECTION ========================================= */ .usp-section { position: relative; border-bottom: solid 1px var(--line); padding: 64px 0; z-index: 2; background: var(--surface); } .usp-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; } .usp-card { padding: 40px 36px; background: #ffffff; border-radius: 10px; box-shadow: 0 2px 10px rgba(20, 35, 60, 0.06); transition: all 0.3s ease;} .usp-card:hover{transform: translateY(-8px);}.usp-icon { display: block; width: 40px; height: 40px; margin-bottom: 32px; color: var(--brand-dark); } .usp-card-title { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 10px; } .usp-card-title h3 { font-size: 20px; } .usp-arrow { display: flex; align-items: center; justify-content: center; width: 18px; height: 18px; color: var(--brand-dark); flex-shrink: 0; } .usp-arrow svg { width: 100%; height: 100%; } .usp-card p { color: #667085; font-size: 15px; line-height: 1.6; }
-/* ========================================= SECTION HEADINGS ========================================= */ .section-heading { max-width: 650px; margin: 0 auto 45px; text-align: center; } .section-heading h2 { margin-bottom: 12px; font-size: clamp(32px, 4vw, 38px); line-height: 1.15; letter-spacing: -1px; } .section-heading p { color: #667085; font-size: 16px; }
-/* ========================================= LATEST PAGES ========================================= */ .latest-pages-section { padding: 30px 0; background: #f7f9fc; } .pages-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 25px; } .page-card { overflow: hidden; background: #ffffff; border: 1px solid #e6e9ee; border-radius: 9px; transition: transform 0.25s ease, box-shadow 0.25s ease; } .page-card:hover { transform: translateY(-5px); box-shadow: 0 15px 35px rgba(20, 35, 60, 0.1); } .page-card-image { height: 210px; overflow: hidden; } .page-card-image img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.4s ease; } .page-card:hover .page-card-image img { transform: scale(1.05); } .page-card-content { padding: 22px; } .page-card h3 { margin-bottom: 8px; font-size: 16px; line-height: 1.3; } .page-card p { margin-bottom: 15px; color: #667085; font-size: 14px; line-height: 1.6; } .read-more { color: var(--brand); font-size: 14px; font-weight: 700; }
-/* ========================================= ABOUT SECTION ========================================= */ .about-section { padding: 110px 0; } .about-grid { display: grid; grid-template-columns: 1fr 1fr; align-items: center; gap: 70px; } .about-image { overflow: hidden; border-radius: 12px; } .about-image img { aspect-ratio: 4 / 3; object-fit: cover; } .about-content h2 { max-width: 550px; margin-bottom: 20px; font-size: clamp(32px, 4vw, 38px); line-height: 1.15; letter-spacing: -1px; } .about-content p { max-width: 600px; margin-bottom: 18px; color: #667085; font-size: 16px; } .about-content .btn { margin-top: 12px; }
-/* ========================================= LATEST BLOG ========================================= */ .latest-blog-section { padding: 50px 0; background: #f7f9fc; } .blog-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px; } .blog-card { overflow: hidden; background: #ffffff; border: 1px solid #e6e9ee; border-radius: 10px; } .blog-image { height: 260px; overflow: hidden; } .blog-image img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.4s ease; } .blog-card:hover .blog-image img { transform: scale(1.05); } .blog-content { padding: 25px; } .blog-meta { display: block; margin-bottom: 10px; color: var(--brand); font-size: 12px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; } .blog-content h3 { margin-bottom: 12px; font-size: 22px; line-height: 1.3; } .blog-content p { margin-bottom: 18px; color: #667085; font-size: 15px; } /* ========================================= TABLET ========================================= */ @media (max-width: 1000px) { .pages-grid { grid-template-columns: repeat(3, 1fr); } .about-grid { gap: 40px; } }
-/* ========================================= MOBILE ========================================= */ @media (max-width: 768px) { .container { width: min(100% - 30px, 600px); } /* Hero */ .hero { min-height: 600px; } .hero-content { padding: 70px 0; flex-direction: column; align-items: stretch; gap: 32px; } .hero-text { max-width: none; } .hero-search-card { max-width: 100%; } .hero h1 { font-size: 42px; letter-spacing: -1px; } .hero p { font-size: 16px; } /* USP */ .usp-section { padding: 50px 0; } .usp-grid { grid-template-columns: 1fr; } .usp-card { padding: 28px; } /* Latest Pages */ .latest-pages-section { padding: 70px 0; } .pages-grid { grid-template-columns: repeat(2, 1fr); gap: 18px; } .page-card-image { height: 180px; } .page-card-content { padding: 18px; } /* About */ .about-section { padding: 75px 0; } .about-grid { grid-template-columns: 1fr; gap: 40px; } .about-content h2 { font-size: 36px; } /* Blog */ .latest-blog-section { padding: 75px 0; } .blog-grid { grid-template-columns: 1fr; } figure.wp-block-table { overflow-x: scroll; } }
-/* ========================================= SMALL MOBILE========================================= */ 
-@media (max-width: 480px) { .container { width: calc(100% - 24px); } .hero { min-height: 570px; } .hero h1 { font-size: 36px; } .hero-search-card { padding: 24px 20px; } .btn { width: 100%; } .pages-grid { grid-template-columns: 1fr; } .page-card-image { height: 220px; } .section-heading { margin-bottom: 32px; } .section-heading h2 { font-size: 32px; } .about-content h2 { font-size: 32px; } .blog-image { height: 220px; } }
+/* ============================ USP ============================ */
+/* One continuous divided panel instead of three separate boxed cards —
+   still three columns, but reads as one strip rather than a card grid. */
+.usp-section {
+  position: relative;
+  border-bottom: 1px solid var(--line);
+  padding: 64px 0;
+  z-index: 2;
+  background: var(--surface);
+}
+.usp-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  background: #ffffff;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-card);
+  overflow: hidden;
+}
+.usp-card {
+  padding: 40px 36px;
+  border-right: 1px solid var(--line);
+  transition: background-color 0.25s ease;
+  display:flex;
+  flex-direction: column; 
+  align-items: center;
+}
+.usp-card:last-child {
+  border-right: none;
+}
+.usp-card:hover {
+  background: var(--surface);
+}
+.usp-icon {
+  display: block;
+  width: 40px;
+  height: 40px;
+  margin-bottom: 32px;
+  color: var(--brand);
+}
+.usp-card-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+.usp-card-title h3 {
+  font-size: 20px;
+}
+.usp-arrow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  color: var(--accent);
+  flex-shrink: 0;
+}
+.usp-arrow svg {
+  width: 100%;
+  height: 100%;
+}
+.usp-card p {
+  color: var(--muted);
+  font-size: 15px;
+  line-height: 1.65;
+}
+
+/* ======================= SECTION HEADINGS ======================= */
+.section-heading {
+  position: relative;
+  max-width: 650px;
+  margin: 0 auto 45px;
+  text-align: center;
+  padding-bottom: 18px;
+}
+.section-heading::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  transform: translateX(-50%);
+  width: 56px;
+  height: 3px;
+  border-radius: 2px;
+  background: var(--accent);
+}
+.section-heading h2 {
+  margin-bottom: 12px;
+  font-size: clamp(32px, 4vw, 40px);
+  line-height: 1.1;
+  letter-spacing: -1.4px;
+}
+.section-heading p {
+  color: var(--muted);
+  font-size: 16px;
+}
+
+/* ========================= LATEST PAGES ========================= */
+/* Floating-caption tiles: the caption sits as a pill overlapping the
+   bottom edge of the photo, instead of a text block stacked under it. */
+.latest-pages-section {
+  padding: 30px 0;
+  background: #ffffff;
+}
+.pages-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 25px;
+}
+.page-card {
+  overflow: hidden;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-card);
+  transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+  position: relative;
+}
+.page-card:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--shadow-card-hover);
+  border-color: #cfdcd8;
+}
+.page-card-image {
+  height: 210px;
+  overflow: hidden;
+  background: var(--surface);
+}
+.page-card-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.4s ease;
+}
+.page-card:hover .page-card-image img {
+  transform: scale(1.05);
+}
+.page-card-content {
+  position: absolute;
+  z-index: 2;
+  bottom: 6px;
+  left: 6px;
+  right: 6px;
+  padding: 10px 12px;
+  background: #fff;
+  border-radius: calc(var(--radius-card) - 4px);
+  box-shadow: 0 8px 18px -8px rgba(12, 42, 38, 0.35);
+}
+.page-card h3 {
+  margin-bottom: 0;
+  font-size: 16px;
+  line-height: 1.35;
+}
+.page-card p {
+  margin-bottom: 15px;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.6;
+}
+.read-more {
+  color: var(--brand);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+/* ============================ ABOUT ============================ */
+/* An amber square peeks out from behind the photo's corner — the one
+   accessory in this section, no extra markup needed. */
+.about-section {
+  padding: 110px 0;
+}
+.about-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: center;
+  gap: 70px;
+}
+.about-image {
+  position: relative;
+}
+.about-image::after {
+  content: "";
+  position: absolute;
+  right: -18px;
+  bottom: -18px;
+  width: 100%;
+  height: 100%;
+  background: var(--accent);
+  border-radius: var(--radius-card);
+  z-index: 0;
+}
+.about-image img {
+  position: relative;
+  z-index: 1;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  border-radius: var(--radius-card);
+  display: block;
+}
+.about-content h2 {
+  max-width: 550px;
+  margin-bottom: 20px;
+  font-size: clamp(32px, 4vw, 40px);
+  line-height: 1.1;
+  letter-spacing: -1.4px;
+}
+.about-content p {
+  max-width: 600px;
+  margin-bottom: 18px;
+  color: var(--muted);
+  font-size: 16px;
+  line-height: 1.7;
+}
+.about-content .btn {
+  margin-top: 12px;
+}
+
+/* ========================= LATEST BLOG ========================= */
+/* No boxed card here — the photo carries the tile, text sits underneath
+   with breathing room instead of a bordered container, for contrast
+   against the boxed USP strip and the pages grid above it. */
+.latest-blog-section {
+  padding: 50px 0;
+  background: var(--surface);
+}
+.blog-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 40px;
+}
+.blog-card {
+  background: transparent;
+}
+.blog-image {
+  height: 230px;
+  overflow: hidden;
+  border-radius: var(--radius-card);
+  background: var(--surface);
+}
+.blog-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.4s ease;
+}
+.blog-card:hover .blog-image img {
+  transform: scale(1.05);
+}
+.blog-content {
+  padding: 20px 2px 0;
+}
+.blog-meta {
+  display: block;
+  margin-bottom: 10px;
+  color: var(--accent-ink);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+.blog-content h3 {
+  margin-bottom: 12px;
+  font-size: 22px;
+  line-height: 1.25;
+}
+.blog-content p {
+  margin-bottom: 18px;
+  color: var(--muted);
+  font-size: 15px;
+}
+
+/* ============================ TABLET ============================ */
+@media (max-width: 1000px) {
+  .pages-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  .about-grid {
+    gap: 40px;
+  }
+}
+
+/* ============================ MOBILE ============================ */
+@media (max-width: 768px) {
+  .container {
+    width: min(100% - 30px, 600px);
+  }
+  .hero {
+    min-height: 600px;
+  }
+  .hero-content {
+    padding: 70px 0;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 32px;
+  }
+  .hero-text {
+    max-width: none;
+  }
+  .hero-search-card {
+    max-width: 100%;
+  }
+  .hero h1 {
+    font-size: 42px;
+    letter-spacing: -1.4px;
+  }
+  .hero p {
+    font-size: 16px;
+  }
+  .usp-section {
+    padding: 50px 0;
+  }
+  .usp-grid {
+    grid-template-columns: 1fr;
+  }
+  .usp-card {
+    padding: 28px;
+    border-right: none;
+    border-bottom: 1px solid var(--line);
+  }
+  .usp-card:last-child {
+    border-bottom: none;
+  }
+  .latest-pages-section {
+    padding: 70px 0;
+  }
+  .pages-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 18px;
+  }
+  .page-card-image {
+    height: 180px;
+  }
+  .page-card-content {
+    padding: 8px 10px;
+  }
+  .about-section {
+    padding: 75px 0;
+  }
+  .about-grid {
+    grid-template-columns: 1fr;
+    gap: 40px;
+  }
+  .about-content h2 {
+    font-size: 36px;
+  }
+  .latest-blog-section {
+    padding: 75px 0;
+  }
+  .blog-grid {
+    grid-template-columns: 1fr;
+  }
+  figure.wp-block-table {
+    overflow-x: scroll;
+  }
+}
+
+/* ========================= SMALL MOBILE ========================= */
+@media (max-width: 480px) {
+  .container {
+    width: calc(100% - 24px);
+  }
+  .hero {
+    min-height: 570px;
+  }
+  .hero h1 {
+    font-size: 36px;
+  }
+  .hero-search-card {
+    padding: 24px 20px;
+  }
+  .btn {
+    width: 100%;
+  }
+  .pages-grid {
+    grid-template-columns: 1fr;
+  }
+  .page-card-image {
+    height: 220px;
+  }
+  .section-heading {
+    margin-bottom: 32px;
+  }
+  .section-heading h2 {
+    font-size: 32px;
+  }
+  .about-content h2 {
+    font-size: 32px;
+  }
+  .blog-image {
+    height: 220px;
+  }
+}
 
 .schema-faq-section {
-    padding: 12px 15px;
-    border-radius: 8px;
-    border: 1px solid #ededed;
-    margin-bottom: 24px;
+  padding: 14px 16px;
+  border-radius: var(--radius-card);
+  border: 1px solid var(--line);
+  background: var(--surface);
+  margin-bottom: 24px;
 }
 .schema-faq-question {
-    font-weight: 600;
-    margin-bottom: 12px;
-    display: inline-block;
+  font-weight: 700;
+  margin-bottom: 12px;
+  display: inline-block;
 }
 .schema-faq-answer {
-    margin: 0!important;
+  margin: 0 !important;
 }
 h2.wp-block-heading strong {
-    font-weight: bold;
+  font-weight: bold;
 }

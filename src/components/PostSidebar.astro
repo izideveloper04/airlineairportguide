@@ -1,0 +1,29 @@
+---
+interface PostSummaryItem {
+  slug: string;
+  title: string;
+}
+
+interface Props {
+  /** Other posts to link to — caller already excludes the current post. */
+  posts: PostSummaryItem[];
+}
+
+const { posts } = Astro.props;
+---
+
+{posts.length > 0 && (
+  <nav aria-label="Other blog posts" class="side-nav sticky top-20 self-start">
+    <h2 class="side-nav__title">More From the Blog</h2>
+    <ul class="side-nav__list">
+      {posts.map((post) => (
+        <li>
+          <a href={`/blog/${post.slug}`} class="side-nav__link">
+            <span>{post.title}</span>
+            <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
+          </a>
+        </li>
+      ))}
+    </ul>
+  </nav>
+)}

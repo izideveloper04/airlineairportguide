@@ -11,16 +11,18 @@ const { pages } = Astro.props;
 ---
 
 {pages.length > 0 ? (
-  <div class="card-grid">
+  <div class="pages-grid">
     {pages.map((page) => (
-      <a href={`/${page.fullPath}`} class="card" data-title={page.title.toLowerCase()}>
-        <div class="card__media">
-          <FeaturedImage src={page.featuredImage} alt={page.title} />
-        </div>
-        <div class="card__body">
-          <p class="card__title">{page.title}</p>
-        </div>
-      </a>
+      <article class="page-card" data-title={page.title.toLowerCase()}>
+        <a href={`/${page.fullPath}`}>
+          <div class="page-card-image">
+            <FeaturedImage src={page.featuredImage} alt={page.title} />
+          </div>
+          <div class="page-card-content">
+            <h3>{page.title}</h3>
+          </div>
+        </a>
+      </article>
     ))}
   </div>
 ) : (

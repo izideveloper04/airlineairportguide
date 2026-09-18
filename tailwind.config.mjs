@@ -25,7 +25,7 @@ export default {
         surface: "#f4f7fb",
       },
       fontFamily: {
-        sans: ["Outfit", "system-ui", "-apple-system", "sans-serif"],
+        sans: ['Manrope', 'ui-sans-serif', 'system-ui', 'sans-serif'],
         // Headings sitewide use Jost automatically via the h1-h6 tag
         // selector in global.css — this utility exists for the rare case
         // something needs Jost on a non-heading element.
