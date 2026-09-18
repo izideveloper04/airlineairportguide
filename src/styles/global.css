@@ -21,9 +21,9 @@
 
 @layer base {
   :root {
-    --brand: #10605a;
-    --brand-dark: #0a423d;
-    --brand-tint: #e4f0ed;
+    --brand: #076b3b;
+    --brand-dark: #054928;
+    --brand-tint: #e3f3ea;
     --accent: #d99a2b;
     --accent-ink: #8a5a06;
     --accent-soft: #fbf1dd;
@@ -36,9 +36,9 @@
     --radius-card: 14px;
     --radius-control: 999px;
 
-    --shadow-card: 0 1px 2px rgba(12, 42, 38, 0.05), 0 1px 3px rgba(12, 42, 38, 0.06);
-    --shadow-card-hover: 0 18px 30px -14px rgba(12, 42, 38, 0.28);
-    --shadow-float: 0 22px 44px -18px rgba(12, 42, 38, 0.32);
+    --shadow-card: 0 1px 2px rgba(5, 73, 40, 0.05), 0 1px 3px rgba(5, 73, 40, 0.06);
+    --shadow-card-hover: 0 18px 30px -14px rgba(5, 73, 40, 0.28);
+    --shadow-float: 0 22px 44px -18px rgba(5, 73, 40, 0.32);
   }
 
   body {
@@ -58,6 +58,14 @@
   input:focus-visible {
     outline: 2px solid var(--accent);
     outline-offset: 2px;
+  }
+
+  .bg-brands {
+    background-color: var(--brand);
+  }
+
+  .bg-brands-dark {
+    background-color: var(--brand-dark);
   }
 
   .visually-hidden {
