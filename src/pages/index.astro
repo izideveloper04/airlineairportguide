@@ -7,8 +7,8 @@ import { Image } from "astro:assets";
 import BaseLayout from "../layouts/BaseLayout.astro";
 import FeaturedImage from "../components/FeaturedImage.astro";
 import { getPageTree, getPosts, isChildTemplate } from "../lib/wp";
-import heroImage from "../assets/images/airpp.webp";
-import aboutImage from "../assets/images/about.webp";
+import heroImage from "../assets/images/guide-bg.webp";
+import aboutImage from "../assets/images/guide-abt.webp";
 
 // Unlike robots.txt/sitemap.xml/[...slug].astro, this page has no
 // STAGING-dependent output to worry a CDN into caching stale (the noindex
@@ -23,7 +23,7 @@ Astro.response.headers.set("Cache-Control", "public, max-age=0, s-maxage=30, sta
 const siteSchema = {
   "@context": "https://schema.org",
   "@type": "WebSite",
-  name: "Airlines Locations",
+  name: "AirlineAirportGuide",
   url: Astro.site?.toString(),
 };
 

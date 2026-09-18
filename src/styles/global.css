@@ -68,6 +68,14 @@
     background-color: var(--brand-dark);
   }
 
+  .text-brands {
+    color: var(--brand);
+  }
+
+  .text-accents {
+    color: var(--accent);
+  }
+
   .visually-hidden {
     position: absolute;
     width: 1px;

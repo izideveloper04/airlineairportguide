@@ -31,7 +31,7 @@ import logo from "../assets/images/logo/logo-AirlinesLocations.png";
           {navItems.map((item) => (
             <li class:list={["relative", (item.submenu?.length ?? 0) > 0 && "group"]}>
               {item.href && item.href !== "javascript:void(0)" ? (
-                <a href={item.href} class="inline-flex items-center gap-1 py-2 hover:text-brand">
+                <a href={item.href} class="inline-flex items-center gap-1 py-2 hover:text-accents">
                   {item.label}
                   {item.chevron && <span aria-hidden="true" class="text-ink/40">&#9662;</span>}
                 </a>
@@ -57,7 +57,7 @@ import logo from "../assets/images/logo/logo-AirlinesLocations.png";
                   <ul class="bg-white border border-[var(--line)] rounded-md shadow-sm py-1">
                     {item.submenu.map((entry) => (
                       <li>
-                        <a href={entry.href} class="block px-3 py-1.5 text-sm font-normal text-ink hover:bg-[var(--surface)] hover:text-brand">
+                        <a href={entry.href} class="block px-3 py-1.5 text-sm font-normal text-ink hover:bg-[var(--surface)] hover:text-accents">
                           {entry.label}
                         </a>
                       </li>
