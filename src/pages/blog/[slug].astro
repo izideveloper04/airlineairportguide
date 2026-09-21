@@ -39,13 +39,15 @@ const dateFormatter = new Intl.DateTimeFormat("en-US", { dateStyle: "long" });
   ogImage={meta.ogImage}
   schema={meta.schema}
 >
-  <div class="page-hero">
-    <div class="page-hero__main">
-      <Breadcrumbs items={[{ label: "Blog", href: "/blog" }, { label: post.title }]} skipSchema />
-      <h1 class="page-hero__title">{post.title}</h1>
-      <time datetime={post.date} class="block text-sm text-ink/60 mt-2">
-        {dateFormatter.format(new Date(post.date))}
-      </time>
+  <div class="page-hero" slot="hero">
+    <div class="page-hero__inner">
+      <div class="page-hero__main">
+        <Breadcrumbs items={[{ label: "Blog", href: "/blog" }, { label: post.title }]} skipSchema />
+        <h1 class="page-hero__title">{post.title}</h1>
+        <time datetime={post.date} class="block text-sm text-ink/60 mt-2">
+          {dateFormatter.format(new Date(post.date))}
+        </time>
+      </div>
     </div>
   </div>
 

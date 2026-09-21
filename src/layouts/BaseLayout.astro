@@ -106,8 +106,11 @@ const schemaJson = schema
   </head>
   <body class="min-h-screen flex flex-col bg-white text-ink font-sans antialiased">
     <Header />
-    <main class={fullBleed ? "flex-1 w-full" : "flex-1 w-full container py-8"}>
-      <slot />
+    <main class="flex-1 w-full">
+      <slot name="hero" />
+      <div class={fullBleed ? undefined : "container py-8"}>
+        <slot />
+      </div>
     </main>
     <Footer />
   </body>

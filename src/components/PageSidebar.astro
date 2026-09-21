@@ -10,7 +10,7 @@ const { pages } = Astro.props;
 ---
 
 {pages.length > 0 && (
-  <nav aria-label="Latest Pages" class="side-nav sticky top-20 self-start">
+  <nav aria-label="Latest Pages" class="side-nav">
     <h2 class="side-nav__title">Latest Pages</h2>
     <ul class="side-nav__list">
       {pages.map((page) => (

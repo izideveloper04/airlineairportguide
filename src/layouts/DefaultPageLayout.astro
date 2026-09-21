@@ -27,10 +27,12 @@ const breadcrumbItems = [
   ogImage={meta.ogImage}
   schema={meta.schema}
 >
-  <div class="page-hero">
-    <div class="page-hero__main">
-      <Breadcrumbs items={breadcrumbItems} skipSchema />
-      <h1 class="page-hero__title">{page.title}</h1>
+  <div class="page-hero" slot="hero">
+    <div class="page-hero__inner">
+      <div class="page-hero__main">
+        <Breadcrumbs items={breadcrumbItems} skipSchema />
+        <h1 class="page-hero__title">{page.title}</h1>
+      </div>
     </div>
   </div>
 

@@ -2,9 +2,10 @@
 // Hand-built listing page (not a single WP record) — lists published WP
 // posts as cards, newest first. "blog" is reserved in RESERVED_SLUGS
 // (wp.ts) so a WP page can never shadow this route. Each card links to
-// src/pages/blog/[slug].astro for the full post. Reuses the same .card
-// styling as the homepage's "From the blog" section (src/styles/global.css)
-// so a post looks the same whether it's found there or on this full listing.
+// src/pages/blog/[slug].astro for the full post. Reuses the same
+// .blog-grid/.blog-card styling as the homepage's "From the blog" section
+// (src/styles/global.css) so a post looks the same whether it's found there
+// or on this full listing.
 export const prerender = false;
 
 import BaseLayout from "../layouts/BaseLayout.astro";
@@ -20,28 +21,34 @@ Astro.response.headers.set("Cache-Control", "no-store");
 ---
 
 <BaseLayout title="Blog | Airlines Locations" description="News and updates from Airlines Locations.">
-  <div class="page-hero">
-    <div class="page-hero__main">
-      <Breadcrumbs items={[{ label: "Blog" }]} />
-      <h1 class="page-hero__title">Blog</h1>
-      <p class="text-sm text-ink/60 mt-2">
-        {posts.length} {posts.length === 1 ? "post" : "posts"} published.
-      </p>
+  <div class="page-hero" slot="hero">
+    <div class="page-hero__inner">
+      <div class="page-hero__main">
+        <Breadcrumbs items={[{ label: "Blog" }]} />
+        <h1 class="page-hero__title">Blog</h1>
+        <p class="text-sm text-ink/60 mt-2">
+          {posts.length} {posts.length === 1 ? "post" : "posts"} published.
+        </p>
+      </div>
     </div>
   </div>
 
   {posts.length > 0 ? (
-    <div class="card-grid">
+    <div class="blog-grid">
       {posts.map((post) => (
-        <article class="card">
-          <a href={`/blog/${post.slug}`} class="card__media">
-            <FeaturedImage src={post.featuredImage} />
+        <article class="blog-card">
+          <a href={`/blog/${post.slug}`}>
+            <div class="blog-image">
+              <FeaturedImage src={post.featuredImage} />
+            </div>
           </a>
-          <div class="card__body">
-            <p class="card__title"><a href={`/blog/${post.slug}`}>{post.title}</a></p>
-            <time datetime={post.date} class="card__meta block mt-1">{dateFormatter.format(new Date(post.date))}</time>
-            <div class="card__excerpt" set:html={post.excerpt} />
-            <a href={`/blog/${post.slug}`} class="card__cta">Read more →</a>
+          <div class="blog-content">
+            <time datetime={post.date} class="blog-meta">{dateFormatter.format(new Date(post.date))}</time>
+            <h3>
+              <a href={`/blog/${post.slug}`}>{post.title}</a>
+            </h3>
+            <div set:html={post.excerpt} />
+            <a href={`/blog/${post.slug}`} class="read-more">Read Article →</a>
           </div>
         </article>
       ))}

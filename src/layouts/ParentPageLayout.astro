@@ -39,15 +39,17 @@ const SHOW_FILTER_THRESHOLD = 9;
   <!-- This template is a directory page, not a content page, so
        page.content is deliberately never rendered here. Children render as
        a card grid below, with no sidebar. -->
-  <div class="page-hero">
-    <div class="page-hero__main">
-      <Breadcrumbs items={breadcrumbItems} skipSchema />
-      <h1 class="page-hero__title">{page.title}</h1>
-      {children.length > 0 && (
-        <p class="text-sm text-ink/60 mt-2">
-          {children.length} {children.length === 1 ? "page" : "pages"} listed under {page.title}.
-        </p>
-      )}
+  <div class="page-hero" slot="hero">
+    <div class="page-hero__inner">
+      <div class="page-hero__main">
+        <Breadcrumbs items={breadcrumbItems} skipSchema />
+        <h1 class="page-hero__title">{page.title}</h1>
+        {children.length > 0 && (
+          <p class="text-sm text-ink/60 mt-2">
+            {children.length} {children.length === 1 ? "page" : "pages"} listed under {page.title}.
+          </p>
+        )}
+      </div>
     </div>
   </div>
 

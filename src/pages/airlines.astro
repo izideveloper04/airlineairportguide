@@ -24,13 +24,15 @@ Astro.response.headers.set("Cache-Control", "no-store");
 ---
 
 <BaseLayout title="Airlines | Airlines Locations" description="Airlines operating at Airlines Locations.">
-  <div class="page-hero">
-    <div class="page-hero__main">
-      <Breadcrumbs items={[{ label: "Airlines" }]} />
-      <h1 class="page-hero__title">Airlines</h1>
-      <p class="text-sm text-ink/60 mt-2">
-        {results.length} {results.length === 1 ? "airline" : "airlines"} listed{query && ` matching "${query}"`}.
-      </p>
+  <div class="page-hero" slot="hero">
+    <div class="page-hero__inner">
+      <div class="page-hero__main">
+        <Breadcrumbs items={[{ label: "Airlines" }]} />
+        <h1 class="page-hero__title">Airlines</h1>
+        <p class="text-sm text-ink/60 mt-2">
+          {results.length} {results.length === 1 ? "airline" : "airlines"} listed{query && ` matching "${query}"`}.
+        </p>
+      </div>
     </div>
   </div>
 
