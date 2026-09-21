@@ -641,6 +641,45 @@
     background: var(--surface);
   }
 
+  .related-pages {
+    margin-top: 3rem;
+  }
+  .related-pages__heading {
+    font-size: 1.3rem;
+    margin-bottom: 1rem;
+  }
+  /* Text-only link list (up to 50 entries) - laid out in columns rather
+     than a single tall column, since a card grid would be too dense
+     without a thumbnail to anchor each entry. */
+  .related-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 0 1.5rem;
+  }
+  .related-list__link {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    padding: 0.6rem 0;
+    border-bottom: 1px solid var(--line);
+    font-size: 0.9rem;
+  }
+  .related-list__link:hover {
+    color: var(--brand);
+  }
+  .related-list__link svg {
+    width: 14px;
+    height: 14px;
+    flex-shrink: 0;
+    opacity: 0.5;
+  }
+  @media (max-width: 480px) {
+    .related-list {
+      grid-template-columns: 1fr;
+    }
+  }
+
   .comments {
     margin-top: 3rem;
     padding: 2rem;

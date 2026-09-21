@@ -3,14 +3,29 @@ import type { WPPageSummary } from "../lib/wp";
 import FeaturedImage from "./FeaturedImage.astro";
 
 interface Props {
-  /** This parent page's direct children — rendered as a thumbnail + title card grid. */
+  /** This parent page's direct children. */
   pages: WPPageSummary[];
+  /** "cards" (default) is a thumbnail + title grid; "list" is a plain text link list with no images. */
+  layout?: "cards" | "list";
 }
 
-const { pages } = Astro.props;
+const { pages, layout = "cards" } = Astro.props;
 ---
 
-{pages.length > 0 ? (
+{pages.length === 0 ? (
+  <p class="text-ink/60 text-sm py-8 text-center">No pages have been published under this section yet.</p>
+) : layout === "list" ? (
+  <ul class="related-list">
+    {pages.map((page) => (
+      <li>
+        <a href={`/${page.fullPath}`} class="related-list__link" data-title={page.title.toLowerCase()}>
+          <span>{page.title}</span>
+          <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
+        </a>
+      </li>
+    ))}
+  </ul>
+) : (
   <div class="pages-grid">
     {pages.map((page) => (
       <article class="page-card" data-title={page.title.toLowerCase()}>
@@ -25,6 +40,4 @@ const { pages } = Astro.props;
       </article>
     ))}
   </div>
-) : (
-  <p class="text-ink/60 text-sm py-8 text-center">No pages have been published under this section yet.</p>
 )}

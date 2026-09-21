@@ -1,7 +1,7 @@
 ---
 import { Image } from "astro:assets";
 import { navItems } from "../lib/navigation";
-import logo from "../assets/images/logo/logo-AirlinesLocations.png";
+import logo from "../assets/images/logo/logo-airlineairportguide.png";
 
 const year = new Date().getFullYear();
 // Top-level nav items with a real destination — same restraint the header
@@ -14,7 +14,7 @@ const footerLinks = navItems.filter((item) => item.href && item.href !== "javasc
   <div class="container py-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 text-sm">
     <div>
       <a href="/" class="inline-block">
-        <Image src={logo} alt="Airlines Locations" width={220} height={39} densities={[1, 2]} class="h-10 w-auto" />
+        <Image src={logo} alt="AirlineAirportGuide" height={39} densities={[1, 2]} class="h-10 w-auto" />
       </a>
       <p class="text-ink/60 mt-3 max-w-xs leading-relaxed">
         Your dedicated resource for finding airline offices and discovering the contact details, services, and all relevant information that matter.

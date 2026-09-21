@@ -2,11 +2,12 @@
 import BaseLayout from "./BaseLayout.astro";
 import Breadcrumbs from "../components/Breadcrumbs.astro";
 import PageSidebar from "../components/PageSidebar.astro";
+import RelatedPages from "../components/RelatedPages.astro";
 import TableOfContents from "../components/TableOfContents.astro";
 import FeaturedImage from "../components/FeaturedImage.astro";
 import CommentSection from "../components/CommentSection.astro";
 import type { WPPage, Breadcrumb, ResolvedPageMeta } from "../lib/wp";
-import { getChildren, isChildTemplate, getApprovedComments } from "../lib/wp";
+import { getChildren, getPageTree, isChildTemplate, getApprovedComments } from "../lib/wp";
 import { supportPhone } from "../lib/config";
 import { extractToc } from "../lib/toc";
 
@@ -21,17 +22,32 @@ const { page, ancestors, meta } = Astro.props;
 // top-level page (no ancestors) has no parent section to pull siblings from.
 const parent = ancestors.at(-1);
 // Siblings under the same parent are already expected to share the child
-// template by convention, but filter explicitly so the sidebar only ever
-// shows *-child.php pages even if a sibling is ever assigned something else.
-// Newest-published first, capped at 12 — this list has no natural size
-// limit otherwise (it grows with every *-child.php page published).
-const siblings = parent
-  ? (await getChildren({ id: page.parent, fullPath: parent.fullPath }))
-      .filter((sibling) => sibling.id !== page.id && isChildTemplate(sibling.template))
+// template by convention, but filter explicitly so the "Related Pages" list
+// only ever shows *-child.php pages even if a sibling is ever assigned
+// something else. Newest-published first, capped at 50 - this list has no
+// natural size limit otherwise (it grows with every *-child.php page
+// published under this section).
+const [siblings, comments, tree] = await Promise.all([
+  parent
+    ? getChildren({ id: page.parent, fullPath: parent.fullPath }).then((children) =>
+        children
+          .filter((sibling) => sibling.id !== page.id && isChildTemplate(sibling.template))
+          .sort((a, b) => b.date.localeCompare(a.date))
+          .slice(0, 50),
+      )
+    : Promise.resolve([]),
+  getApprovedComments(page.id),
+  getPageTree().catch(() => null),
+]);
+// The sidebar's "Latest Pages" is sitewide (every *-child.php page, not just
+// this page's siblings) - same "newest first, capped, excludes self"
+// convention as the siblings list above.
+const latestPages = tree
+  ? tree.list
+      .filter((p) => p.id !== page.id && isChildTemplate(p.template))
       .sort((a, b) => b.date.localeCompare(a.date))
       .slice(0, 12)
   : [];
-const comments = await getApprovedComments(page.id);
 const { html: content, items: tocItems } = extractToc(page.content);
 
 const breadcrumbItems = [
@@ -63,11 +79,17 @@ const dateFormatter = new Intl.DateTimeFormat("en-US", { dateStyle: "long" });
   <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
     <article class="md:col-span-2">
       <div class="prose" set:html={content} />
+      {siblings.length > 0 && (
+        <section class="related-pages">
+          <h2 class="related-pages__heading">Related Pages</h2>
+          <RelatedPages pages={siblings} layout="list" />
+        </section>
+      )}
       <CommentSection pageId={page.id} commentsOpen={page.commentsOpen} comments={comments} />
     </article>
     <div class="flex flex-col gap-6 sticky top-20 self-start">
       <TableOfContents items={tocItems} />
-      <PageSidebar pages={siblings} />
+      <PageSidebar pages={latestPages} />
     </div>
   </div>
 </BaseLayout>

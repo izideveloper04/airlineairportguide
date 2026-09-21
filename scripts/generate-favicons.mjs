@@ -5,7 +5,7 @@ import { mkdir, writeFile } from "node:fs/promises";
 import sharp from "sharp";
 import pngToIco from "png-to-ico";
 
-const SRC = "src/assets/images/logo/favicon-airlinelocations.png";
+const SRC = "src/assets/images/logo/favicon-airlineairportguide.png";
 const OUT_DIR = "public";
 
 const pngSizes = [
