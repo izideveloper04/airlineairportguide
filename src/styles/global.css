@@ -1268,6 +1268,9 @@
   .about-content h2 {
     font-size: 36px;
   }
+  .about-image:after{
+    display: none;
+  }
   .latest-blog-section {
     padding: 75px 0;
   }
