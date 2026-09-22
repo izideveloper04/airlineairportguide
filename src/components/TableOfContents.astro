@@ -10,7 +10,7 @@ const { items } = Astro.props;
 
 {items.length > 1 && (
   <nav aria-label="Table of contents" class="side-nav">
-    <h2 class="side-nav__title">On This Page</h2>
+    <h2 class="side-nav__title">Table of Contents</h2>
     <ul class="toc-nav__list">
       {items.map((item) => (
         <li>
