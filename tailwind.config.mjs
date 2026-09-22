@@ -13,9 +13,9 @@ export default {
       // needs a real color value, not a CSS variable, to composite alpha.
       colors: {
         brand: {
-          DEFAULT: "#1264d8",
-          dark: "#0d4fae",
-          light: "#5a9ce8",
+          DEFAULT: "#076b3b",
+          dark: "#054928",
+          light: "#e3f3ea",
         },
         accent: {
           DEFAULT: "#f97316",

@@ -53,6 +53,14 @@
     letter-spacing: -0.02em;
   }
 
+  /* Un-styled anchors otherwise fall back to the browser's default link
+     blue/purple plus an underline - this is a low-specificity reset so any
+     component's own color/decoration classes still win. */
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+
   a:focus-visible,
   button:focus-visible,
   input:focus-visible {
@@ -337,7 +345,7 @@
     width: 64px;
     height: 3px;
     border-radius: 2px;
-    background: var(--accent);
+    background: var(--brand);
   }
   .page-hero__main {
     flex: 1 1 320px;

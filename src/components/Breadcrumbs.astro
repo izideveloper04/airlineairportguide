@@ -46,7 +46,7 @@ const breadcrumbSchema = {
     {items.map((item, i) => (
       <li class="flex items-center gap-1">
         {item.href ? (
-          <a href={item.href} class="hover:text-brand">{item.label}</a>
+          <a href={item.href} class="hover:text-brands">{item.label}</a>
         ) : (
           <span aria-current="page" class="text-ink">{item.label}</span>
         )}
