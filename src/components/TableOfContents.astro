@@ -6,19 +6,47 @@ interface Props {
 }
 
 const { items } = Astro.props;
+
+interface TocGroup {
+  heading: TocItem;
+  children: TocItem[];
+}
+
+// Group each H3 under the nearest preceding H2 so the tree connector below
+// can show which sub-headings belong to which section. An H3 with no
+// preceding H2 (content starts with a subheading) is promoted to its own
+// top-level entry rather than dropped.
+const groups: TocGroup[] = [];
+for (const item of items) {
+  if (item.level === 2 || groups.length === 0) {
+    groups.push({ heading: item, children: [] });
+  } else {
+    groups[groups.length - 1].children.push(item);
+  }
+}
 ---
 
 {items.length > 1 && (
   <nav aria-label="Table of contents" class="side-nav">
     <h2 class="side-nav__title">Table of Contents</h2>
-    <ul class="toc-nav__list">
-      {items.map((item) => (
+    <ol class="toc-nav__list">
+      {groups.map((group, i) => (
         <li>
-          <a href={`#${item.id}`} class={item.level === 3 ? "toc-nav__link toc-nav__link--sub" : "toc-nav__link"}>
-            {item.text}
+          <a href={`#${group.heading.id}`} class="toc-nav__link">
+            <span class="toc-nav__number" aria-hidden="true">{i + 1}</span>
+            <span>{group.heading.text}</span>
           </a>
+          {group.children.length > 0 && (
+            <ul class="toc-nav__branch">
+              {group.children.map((child) => (
+                <li>
+                  <a href={`#${child.id}`} class="toc-nav__link toc-nav__link--sub">{child.text}</a>
+                </li>
+              ))}
+            </ul>
+          )}
         </li>
       ))}
-    </ul>
+    </ol>
   </nav>
 )}

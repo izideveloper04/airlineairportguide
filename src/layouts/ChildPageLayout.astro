@@ -33,7 +33,7 @@ const [siblings, comments, tree] = await Promise.all([
         children
           .filter((sibling) => sibling.id !== page.id && isChildTemplate(sibling.template))
           .sort((a, b) => b.date.localeCompare(a.date))
-          .slice(0, 50),
+          .slice(0, 54),
       )
     : Promise.resolve([]),
   getApprovedComments(page.id),

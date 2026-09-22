@@ -451,25 +451,79 @@
   .toc-nav__list {
     display: flex;
     flex-direction: column;
-    gap: 0.15rem;
+  }
+  /* A divider line between each top-level entry - most real content here is
+     a flat run of same-level H2s (no H3s to branch below), so this is the
+     separator that actually shows up in practice. */
+  .toc-nav__list > li:not(:last-child) {
+    border-bottom: 1px solid var(--line);
   }
   .toc-nav__link {
-    display: block;
-    padding: 0.45rem 0.6rem;
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    padding: 0.5rem 0.6rem;
     border-radius: 8px;
     font-size: 0.9rem;
     color: var(--ink);
-    border-left: 2px solid transparent;
   }
   .toc-nav__link:hover {
     background: #fff;
     color: var(--brand);
   }
+  .toc-nav__number {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.35rem;
+    height: 1.35rem;
+    flex-shrink: 0;
+    border-radius: 50%;
+    background: var(--brand-tint);
+    color: var(--brand);
+    font-size: 0.7rem;
+    font-weight: 700;
+  }
   .toc-nav__link--sub {
-    margin-left: 0.75rem;
+    padding-left: 0;
     font-size: 0.85rem;
     color: var(--muted);
-    border-left: 2px solid var(--line);
+  }
+  /* Tree connector for the H3s nested under an H2 - a vertical line runs
+     through every sub-item except the last, which stops at its own branch
+     tick instead of continuing past it (the classic "├"/"└" tree shape),
+     done entirely with :last-child rather than JS. */
+  .toc-nav__branch {
+    margin: 0.1rem 0 0.3rem 1.05rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
+  }
+  .toc-nav__branch li {
+    position: relative;
+    padding-left: 1rem;
+  }
+  .toc-nav__branch li::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background: var(--line);
+  }
+  .toc-nav__branch li:last-child::before {
+    bottom: auto;
+    height: 1.05rem;
+  }
+  .toc-nav__branch li::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 1.05rem;
+    width: 0.7rem;
+    height: 1px;
+    background: var(--line);
   }
 
   .hero-photo {
@@ -599,7 +653,10 @@
     line-height: 1.25;
   }
   .prose h2 {
-    font-size: 1.45rem;
+    font-size: 1.75rem;
+  }
+  .prose h2:first-child {
+    margin-top: 0;
   }
   .prose h3 {
     font-size: 1.15rem;
@@ -612,6 +669,12 @@
   .prose ol {
     margin: 1em 0;
     padding-left: 1.4em;
+  }
+  .prose ul {
+    list-style: disc;
+  }
+  .prose ol {
+      list-style: decimal;
   }
   .prose li {
     margin: 0.35em 0;
