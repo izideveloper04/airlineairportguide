@@ -34,6 +34,33 @@ add_action( 'rest_api_init', function () {
 			),
 		)
 	);
+
+	/*
+	 * The featured image's URL, resolved server-side. The frontend can't rely
+	 * on `_embed=wp:featuredmedia` for this: an attachment's REST visibility
+	 * is inherited from the post it was originally uploaded to (post_parent),
+	 * not from the page using it as a featured image. An image uploaded to a
+	 * page that is now draft/private/trashed 401s for anonymous requests, so
+	 * WP silently drops it from _embedded (and from _links) even though a
+	 * published page still uses it — the image then never renders.
+	 */
+	foreach ( array( 'page', 'post' ) as $post_type ) {
+		register_rest_field(
+			$post_type,
+			'featured_image_url',
+			array(
+				'get_callback' => function ( $post ) {
+					$thumbnail_id = get_post_thumbnail_id( $post['id'] );
+					return $thumbnail_id ? ( wp_get_attachment_image_url( $thumbnail_id, 'full' ) ?: null ) : null;
+				},
+				'schema'       => array(
+					'type'        => array( 'string', 'null' ),
+					'description' => 'Full-size featured image URL, independent of the attachment\'s own REST visibility.',
+					'context'     => array( 'view' ),
+				),
+			)
+		);
+	}
 } );
 
 /**

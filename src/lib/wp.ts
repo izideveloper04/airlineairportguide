@@ -104,6 +104,8 @@ interface RawWPPage {
   menu_order?: number;
   date: string;
   yoast_head_json?: YoastHead;
+  /** Added by wordpress/rest-api-additions.php; null when no featured image. */
+  featured_image_url?: string | null;
   comment_status?: "open" | "closed";
   _embedded?: {
     "wp:featuredmedia"?: { source_url: string }[];
@@ -130,6 +132,8 @@ interface RawWPPost {
   content: { rendered: string };
   date: string;
   yoast_head_json?: YoastHead;
+  /** Added by wordpress/rest-api-additions.php; null when no featured image. */
+  featured_image_url?: string | null;
   _embedded?: {
     "wp:featuredmedia"?: { source_url: string }[];
   };
@@ -167,8 +171,8 @@ const RESERVED_SLUGS = new Set(["", "api", "airlines", "airline-terminals", "blo
 // them here cuts both the payload and the server-side work, not just what
 // gets sent over the wire. Only the single page actually being rendered
 // needs those (see FULL_PAGE_FIELDS / getPageByPath below).
-const SUMMARY_PAGE_FIELDS = "id,slug,parent,title,wp_template,menu_order,date,_links,_embedded";
-const FULL_PAGE_FIELDS = "id,slug,parent,title,content,wp_template,menu_order,date,yoast_head_json,comment_status,_links,_embedded";
+const SUMMARY_PAGE_FIELDS = "id,slug,parent,title,wp_template,featured_image_url,menu_order,date,_links,_embedded";
+const FULL_PAGE_FIELDS = "id,slug,parent,title,content,wp_template,featured_image_url,menu_order,date,yoast_head_json,comment_status,_links,_embedded";
 
 // A full catalog fetch (dozens to hundreds of paginated requests on a large
 // site) is done as a bounded fan-out rather than one request at a time —
@@ -180,7 +184,7 @@ const CATALOG_FETCH_CONCURRENCY = 6;
 
 async function fetchPagesPage(pageNum: number, perPage: number, fields: string): Promise<{ items: RawWPPage[]; totalPages: number }> {
   const res = await fetch(
-    apiUrl(`/pages?per_page=${perPage}&page=${pageNum}&_embed=wp:featuredmedia&_fields=${fields}`),
+    apiUrl(`/pages?status=publish&per_page=${perPage}&page=${pageNum}&_embed=wp:featuredmedia&_fields=${fields}`),
     { headers: NO_CACHE_REQUEST_HEADERS },
   );
   if (!res.ok) {
@@ -212,7 +216,7 @@ async function fetchAllPosts(): Promise<RawWPPost[]> {
 
   do {
     const res = await fetch(
-      apiUrl(`/posts?per_page=${perPage}&page=${page}&_embed=wp:featuredmedia&_fields=id,slug,title,excerpt,content,date,yoast_head_json,_links,_embedded`),
+      apiUrl(`/posts?status=publish&per_page=${perPage}&page=${page}&_embed=wp:featuredmedia&_fields=id,slug,title,excerpt,content,date,featured_image_url,yoast_head_json,_links,_embedded`),
       { headers: NO_CACHE_REQUEST_HEADERS },
     );
     if (!res.ok) {
@@ -230,7 +234,10 @@ function normalizePath(path: string): string {
   return path.trim().replace(/^\/+|\/+$/g, "").toLowerCase();
 }
 
-function computeFullPath(id: number, byId: Map<number, RawWPPage>): string {
+/** `undefined` if any ancestor is missing from `byId` — i.e. the page sits
+ *  under a parent that isn't published, so it isn't reachable at any URL
+ *  (same rule as walkAncestors below). */
+function computeFullPath(id: number, byId: Map<number, RawWPPage>): string | undefined {
   const segments: string[] = [];
   let current: RawWPPage | undefined = byId.get(id);
   const seen = new Set<number>();
@@ -239,7 +246,9 @@ function computeFullPath(id: number, byId: Map<number, RawWPPage>): string {
     if (seen.has(current.id)) break; // guard against a corrupt/circular parent chain
     seen.add(current.id);
     segments.unshift(current.slug);
-    current = current.parent ? byId.get(current.parent) : undefined;
+    if (!current.parent) break;
+    current = byId.get(current.parent);
+    if (!current) return undefined;
   }
 
   return segments.join("/");
@@ -254,7 +263,7 @@ function toSummary(p: RawWPPage, fullPath: string): WPPageSummary {
     template: p.wp_template ?? "",
     menuOrder: p.menu_order ?? 0,
     date: p.date,
-    featuredImage: p._embedded?.["wp:featuredmedia"]?.[0]?.source_url ?? null,
+    featuredImage: p.featured_image_url || p._embedded?.["wp:featuredmedia"]?.[0]?.source_url || null,
     fullPath,
   };
 }
@@ -275,7 +284,9 @@ async function buildPageTree(): Promise<PageTree> {
   const list: WPPageSummary[] = [];
 
   for (const p of raw) {
-    const fullPath = normalizePath(computeFullPath(p.id, rawById));
+    const rawPath = computeFullPath(p.id, rawById);
+    if (rawPath === undefined) continue;
+    const fullPath = normalizePath(rawPath);
     if (RESERVED_SLUGS.has(fullPath)) continue;
 
     const page = toSummary(p, fullPath);
@@ -353,7 +364,7 @@ async function buildPosts(): Promise<WPPost[]> {
       excerpt: p.excerpt.rendered,
       content: p.content.rendered,
       date: p.date,
-      featuredImage: p._embedded?.["wp:featuredmedia"]?.[0]?.source_url ?? null,
+      featuredImage: p.featured_image_url || p._embedded?.["wp:featuredmedia"]?.[0]?.source_url || null,
       yoast: p.yoast_head_json ?? null,
     }))
     .sort((a, b) => b.date.localeCompare(a.date));
@@ -558,7 +569,7 @@ async function walkAncestors(parentId: number): Promise<AncestorLink[] | undefin
 
 async function fetchPagesBySlug(slug: string): Promise<RawWPPage[]> {
   const res = await fetch(
-    apiUrl(`/pages?slug=${encodeURIComponent(slug)}&_embed=wp:featuredmedia&_fields=${FULL_PAGE_FIELDS}`),
+    apiUrl(`/pages?status=publish&slug=${encodeURIComponent(slug)}&_embed=wp:featuredmedia&_fields=${FULL_PAGE_FIELDS}`),
     { headers: NO_CACHE_REQUEST_HEADERS },
   );
   if (!res.ok) {
@@ -640,7 +651,7 @@ async function fetchChildrenRaw(parentId: number): Promise<RawWPPage[]> {
 
   do {
     const res = await fetch(
-      apiUrl(`/pages?parent=${parentId}&per_page=${perPage}&page=${page}&_embed=wp:featuredmedia&_fields=${SUMMARY_PAGE_FIELDS}`),
+      apiUrl(`/pages?status=publish&parent=${parentId}&per_page=${perPage}&page=${page}&_embed=wp:featuredmedia&_fields=${SUMMARY_PAGE_FIELDS}`),
       { headers: NO_CACHE_REQUEST_HEADERS },
     );
     if (!res.ok) {
