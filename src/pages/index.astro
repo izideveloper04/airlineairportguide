@@ -52,7 +52,7 @@ const postDateFormatter = new Intl.DateTimeFormat("en-US", { dateStyle: "long" }
 ---
 
 <BaseLayout
-  title="AirlineAirportGuide - Airline Office Essential & Local Information"
+  title="AirlineAirportGuide - Airport Terminals & Airline Information"
   description="Looking for an airline office? Search airline locations worldwide for office addresses, contact details, services, and other useful information."
   fullBleed
 >
@@ -63,17 +63,17 @@ const postDateFormatter = new Intl.DateTimeFormat("en-US", { dateStyle: "long" }
     <div class="hero-overlay"></div>
     <div class="container hero-content">
       <div class="hero-text">
-        <span class="hero-eyebrow">FIND. CONNECT. MOVE</span>
-        <h1>One Direction for Every Connection</h1>
+        <span class="hero-eyebrow">FROM CONCOURSE TO CURBSIDE</span>
+        <h1>There’s More Beyond Your Flight</h1>
         <p>
-          Explore airline offices, contact points, and passenger services across a growing network of destinations.
+          A closer look at the terminals, airlines, gates, facilities, and services that shape your journey from arrival to departure.
         </p>
       </div>
 
       <div class="hero-search-card">
-        <h2>Locate Your Airline</h2>
+        <h2>Find Your Terminal</h2>
         <form class="search-form" action="/airlines" method="get">
-          <label for="hero-search-input" class="visually-hidden">Search airlines by name</label>
+          <label for="hero-search-input" class="visually-hidden">Enter airport, city, airport code….</label>
           <div class="search-form__field">
             <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <circle cx="11" cy="11" r="7" />
@@ -97,9 +97,9 @@ const postDateFormatter = new Intl.DateTimeFormat("en-US", { dateStyle: "long" }
             <path d="m9 12 2 2 4-4" />
           </svg>
           <div class="usp-card-title">
-            <h3>Verified Airline Information</h3>
+            <h3>Reliable Airport Details</h3>
           </div>
-          <p class="text-center">Useful airline details organized with accuracy, clarity, and the passenger in mind.</p>
+          <p class="text-center">Access information on terminals, gates, facilities, and passenger services.</p>
         </div>
         <div class="usp-card">
           <svg class="usp-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
@@ -107,9 +107,9 @@ const postDateFormatter = new Intl.DateTimeFormat("en-US", { dateStyle: "long" }
             <path d="M3 12h18M12 3c2.5 2.5 4 5.7 4 9s-1.5 6.5-4 9c-2.5-2.5-4-5.7-4-9s1.5-6.5 4-9Z" />
           </svg>
           <div class="usp-card-title">
-            <h3>Global Office Directory</h3>
+            <h3>Worldwide Airport Coverage</h3>
           </div>
-          <p class="text-center">Explore airline offices and details across a broad network of international destinations.</p>
+          <p class="text-center">Find airport and terminal information across major cities and destinations.</p>
         </div>
         <div class="usp-card">
           <svg class="usp-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
@@ -117,9 +117,9 @@ const postDateFormatter = new Intl.DateTimeFormat("en-US", { dateStyle: "long" }
             <path d="m20 20-3.5-3.5" stroke-linecap="round" />
           </svg>
           <div class="usp-card-title">
-            <h3>Built for Quick Searches</h3>
+            <h3>Easy Access to Information</h3>
           </div>
-          <p class="text-center">Find the details you came for without wading through unnecessary information.</p>
+          <p class="text-center">Get straight to the relevant details, without useless data getting in the way.</p>
         </div>
       </div>
     </div>
@@ -129,9 +129,9 @@ const postDateFormatter = new Intl.DateTimeFormat("en-US", { dateStyle: "long" }
   <section class="latest-pages-section">
     <div class="container">
       <div class="section-heading">
-        <span class="section-eyebrow">AROUND THE NETWORK</span>
-        <h2>Office Listings Across Destinations</h2>
-        <p>Explore airline offices spanning major destinations and international cities.</p>
+        <span class="section-eyebrow">TERMINAL DIRECTORY</span>
+        <h2>Airlines Across Airports</h2>
+        <p>Browse airport listings with dedicated terminal details for cities around the world.</p>
       </div>
       {latestChildPages.length > 0 ? (
         <div class="pages-grid">
@@ -167,12 +167,12 @@ const postDateFormatter = new Intl.DateTimeFormat("en-US", { dateStyle: "long" }
           />
         </div>
         <div class="about-content">
-          <span class="section-eyebrow">ABOUT AirlineAirportGuide</span>
-          <h2>Making Every Airline Easier to Locate</h2>
+          <span class="section-eyebrow">About AirlineAirportGuide</span>
+          <h2>Reference the Airport. Rely on the Details.</h2>
           <p>
-            Flights may take you from one place to another, but the information you need more often than not begins on the ground. We catalog airline offices, locations, contact information, and useful service details to help you find the right airline in the right place.
+            A flight confirmation tells you when to arrive. It doesn't always tell you what to expect once you get there. Knowing your airline's terminal, finding the right gate, or figuring out what's nearby can make a difference. AirlineAirportGuide brings together airport and terminal information, from airline locations and gates to facilities, services, and amenities.
           </p>
-          <a href="#" class="btn btn-primary">Explore More</a>
+          <a href="#" class="btn btn-primary">Know More</a>
         </div>
       </div>
     </div>
@@ -182,9 +182,9 @@ const postDateFormatter = new Intl.DateTimeFormat("en-US", { dateStyle: "long" }
   <section class="latest-blog-section">
     <div class="container">
       <div class="section-heading">
-        <span class="section-eyebrow">FROM THE JOURNAL</span>
-        <h2>Insights Beyond Itineraries</h2>
-        <p>Useful reads on air travel and aviation information</p>
+        <span class="section-eyebrow">WORTH A READ</span>
+        <h2>Featured Articles</h2>
+        <p>Catch up on useful reads covering tips, insights, and trends shaping air travel.</p>
       </div>
       {newsItems.length > 0 ? (
         <div class="blog-grid">

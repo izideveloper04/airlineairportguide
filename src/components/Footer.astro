@@ -8,6 +8,14 @@ const year = new Date().getFullYear();
 // applies to placeholder/no-href items (see Header.astro), just without the
 // submenu chrome a footer link list doesn't need.
 const footerLinks = navItems.filter((item) => item.href && item.href !== "javascript:void(0)");
+// Content for these lives in WP (page_fullwidth.php template) and is served
+// live by [...slug].astro — only the slugs are fixed here.
+const legalLinks = [
+  { label: "About Us", href: "/about-us" },
+  { label: "Disclaimer", href: "/disclaimer" },
+  { label: "Privacy Policy", href: "/privacy-policy" },
+  { label: "Terms & Conditions", href: "/terms-and-conditions" },
+];
 ---
 
 <footer class="mt-auto border-t border-[var(--line)] bg-[var(--surface)]">
@@ -17,50 +25,55 @@ const footerLinks = navItems.filter((item) => item.href && item.href !== "javasc
         <Image src={logo} alt="AirlineAirportGuide" height={39} densities={[1, 2]} class="h-10 w-auto" />
       </a>
       <p class="text-ink/60 mt-3 max-w-xs leading-relaxed">
-        Your dedicated resource for finding airline offices and discovering the contact details, services, and all relevant information that matter.
+        Find the information behind your flight with AirlineAirportGuide, covering airline terminals, airport facilities, passenger services, and other essential details for travelers worldwide.
       </p>
     </div>
 
     <div>
       <h2 class="text-sm font-bold uppercase tracking-wide text-ink/50 mb-3">Explore</h2>
       <ul class="space-y-1.5">
-        <li><a href="/turkish-airlines/turkish-airlines-newark-new-jersey" class="text-ink/70 hover:text-brands">Turkish Airlines Newark – New Jersey</a></li>
-        <li><a href="/eva-air/eva-air-los-angeles" class="text-ink/70 hover:text-brands">EVA Air Los Angeles – California</a></li>
-        <li><a href="/sun-country-airlines/sun-country-airlines-atlanta" class="text-ink/70 hover:text-brands">Sun Country Airlines Atlanta – Georgia</a></li>
-        <li><a href="/eva-air/eva-air-seattle" class="text-ink/70 hover:text-brands">EVA Air Seattle – Washington</a></li>
+        <li><a href="/turkish-airlines/turkish-airlines-pek-terminal-beijing-capital-international-airport" class="text-ink/70 hover:text-brands">What Terminal is Turkish Airlines at PEK – Beijing Capital International Airport</a></li>
+        <li><a href="/delta-airlines/delta-airlines-mco-terminal-orlando-international-airport" class="text-ink/70 hover:text-brands">What Terminal is Delta Airlines at MCO – Orlando International Airport</a></li>
+        <li><a href="/delta-airlines/delta-airlines-aca-terminal-acapulco-international-airport" class="text-ink/70 hover:text-brands">What Terminal is Delta Airlines at ACA – Acapulco International Airport</a></li>
+        <li><a href="/delta-airlines/delta-airlines-aby-terminal-southwest-georgia-regional-airport" class="text-ink/70 hover:text-brands">What Terminal is Delta Airlines at ABY – Southwest Georgia Regional Airport</a></li>
       </ul>
     </div>
 
     <div>
       <h2 class="text-sm font-bold uppercase tracking-wide text-ink/50 mb-3">Top Links</h2>
       <ul class="space-y-1.5">
-        <li><a href="/caspian-airlines/caspian-airlines-abadan-iran" class="text-ink/70 hover:text-brands">Caspian Airlines Abadan Iran</a></li>
-        <li><a href="/royal-jordanian-airlines/royal-jordanian-airlines-antalya-turkey" class="text-ink/70 hover:text-brands">Royal Jordanian Airlines Antalya</a></li>
-        <li><a href="/caspian-airlines/caspian-airlines-ahvaz-iran" class="text-ink/70 hover:text-brands">Caspian Airlines Ahvaz Iran</a></li>
-        <li><a href="/royal-jordanian-airlines/royal-jordanian-airlines-abu-dhabi" class="text-ink/70 hover:text-brands">Royal Jordanian Airlines Abu Dhabi</a></li>
+        <li><a href="/turkish-airlines/turkish-airlines-oua-terminal-ouagadougou-airport" class="text-ink/70 hover:text-brands">What Terminal is Turkish Airlines at OUA – Ouagadougou Airport</a></li>
+        <li><a href="/qatar-airways/qatar-airways-ada-terminal-adana-sakirpasa-airport" class="text-ink/70 hover:text-brands">What Terminal is Qatar Airways at ADA – Adana Sakirpasa Airport</a></li>
+        <li><a href="/qatar-airways/qatar-airways-acc-terminal-kotoka-international-airport" class="text-ink/70 hover:text-brands">What Terminal is Qatar Airways at ACC – Kotoka International Airport</a></li>
+        <li><a href="/turkish-airlines/turkish-airlines-abj-terminal-felix-houphouet-boigny-airport" class="text-ink/70 hover:text-brands">What Terminal is Turkish Airlines at ABJ – Félix Houphouët Boigny International Airport</a></li>
       </ul>
     </div>
 
     <div>
       <h2 class="text-sm font-bold uppercase tracking-wide text-ink/50 mb-3">Popular Links</h2>
       <ul class="space-y-1.5">
-        <li><a href="/caspian-airlines/caspian-airlines-mashhad-iran" class="text-ink/70 hover:text-brands">Caspian Airlines Mashhad Iran</a></li>
-        <li><a href="/turkish-airlines/turkish-airlines-atlanta-georgia" class="text-ink/70 hover:text-brands">Turkish Airlines Atlanta – Georgia</a></li>
-        <li><a href="/lot-polish-airlines/lot-polish-airlines-chicago" class="text-ink/70 hover:text-brands">LOT Polish Airlines Chicago – Illinois</a></li>
-        <li><a href="/caspian-airlines/caspian-airlines-tehran-iran" class="text-ink/70 hover:text-brands">Caspian Airlines Tehran Iran</a></li>
+        <li><a href="/turkish-airlines/turkish-airlines-acc-terminal-kotoka-international-airport" class="text-ink/70 hover:text-brands">What Terminal is Turkish Airlines at ACC – Kotoka International Airport</a></li>
+        <li><a href="/turkish-airlines/turkish-airlines-abv-terminal-nnamdi-azikiwe-international-airport" class="text-ink/70 hover:text-brands">What Terminal is Turkish Airlines at ABV – Nnamdi Azikiwe International Airport</a></li>
+        <li><a href="/qatar-airways/qatar-airways-abv-terminal-nnamdi-azikiwe-international-airport" class="text-ink/70 hover:text-brands">What Terminal is Qatar Airways at ABV – Nnamdi Azikiwe International Airport</a></li>
+        <li><a href="/qatar-airways/qatar-airways-abj-terminal-felix-houphouet-boigny-international-airport" class="text-ink/70 hover:text-brands">What Terminal is Qatar Airways at ABJ – Felix Houphouet Boigny International Airport</a></li>
       </ul>
     </div>
   </div>
 
   <div class="border-t border-[var(--line)]">
     <div class="container py-6 text-xs text-ink/60 leading-relaxed">
-      <span class="font-semibold text-ink/70">Disclaimer:</span> AirlinesLocations is an independent information directory and is not affiliated with, endorsed by, or officially connected to any airline listed on this website. Airline names, trademarks, logos, and related information belong to their respective owners. The information provided is intended for general reference and may change without prior notice. 
+      <span class="font-semibold text-ink/70">Disclaimer:</span> AirlineAirportGuide operates independently and has no official affiliation with the airlines, airports, or aviation authorities referenced on this website. While we aim to provide useful and current information, details may change without notice. Users should verify time-sensitive information directly with the relevant official source.
     </div>
   </div>
 
   <div class="border-t border-[var(--line)]">
-    <div class="container py-4 text-center text-xs text-ink/50">
-      &copy; {year} AirlineAirportGuide. All rights reserved.
+    <div class="container py-4 flex flex-col sm:flex-row sm:justify-between items-center gap-3 text-xs text-ink/50">
+      <p>&copy; {year} AirlineAirportGuide. All rights reserved.</p>
+      <ul class="flex flex-wrap justify-center gap-x-4 gap-y-1">
+        {legalLinks.map((link) => (
+          <li><a href={link.href} class="text-ink/60 hover:text-brands">{link.label}</a></li>
+        ))}
+      </ul>
     </div>
   </div>
 </footer>

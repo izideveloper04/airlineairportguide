@@ -712,6 +712,12 @@ export function isChildTemplate(template: string): boolean {
   return /(?:^|\/)child-page-template\.php$/i.test(template);
 }
 
+// Standalone site pages (About, Disclaimer, Privacy Policy, Terms) —
+// page-templates/page_fullwidth.php in WP.
+export function isFullwidthTemplate(template: string): boolean {
+  return /(?:^|\/)page_fullwidth\.php$/i.test(template);
+}
+
 /**
  * Every page using the parent-section template, regardless of where it sits
  * in the hierarchy — the top-level directory for pages like /airlines. This

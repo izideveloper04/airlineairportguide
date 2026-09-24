@@ -1,0 +1,44 @@
+---
+// Standalone site pages (About, Disclaimer, Privacy Policy, Terms) assigned
+// page-templates/page_fullwidth.php in WP — just the hero and the page's
+// content across the full container width, no featured image or sidebar.
+import BaseLayout from "./BaseLayout.astro";
+import Breadcrumbs from "../components/Breadcrumbs.astro";
+import type { WPPage, Breadcrumb, ResolvedPageMeta } from "../lib/wp";
+
+interface Props {
+  page: WPPage;
+  ancestors: Breadcrumb[];
+  meta: ResolvedPageMeta;
+}
+
+const { page, ancestors, meta } = Astro.props;
+
+const breadcrumbItems = [
+  ...ancestors.map((ancestor) => ({ label: ancestor.title, href: `/${ancestor.fullPath}` })),
+  { label: page.title },
+];
+---
+
+<BaseLayout
+  title={meta.title}
+  description={meta.description}
+  canonical={meta.canonical}
+  ogTitle={meta.ogTitle}
+  ogDescription={meta.ogDescription}
+  ogImage={meta.ogImage}
+  schema={meta.schema}
+>
+  <div class="page-hero" slot="hero">
+    <div class="page-hero__inner">
+      <div class="page-hero__main">
+        <Breadcrumbs items={breadcrumbItems} skipSchema />
+        <h1 class="page-hero__title">{page.title}</h1>
+      </div>
+    </div>
+  </div>
+
+  <article>
+    <div class="prose max-w-none" set:html={page.content} />
+  </article>
+</BaseLayout>

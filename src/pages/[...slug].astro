@@ -6,10 +6,11 @@
 // rebuild/redeploy step at all.
 export const prerender = false;
 
-import { getPageByPath, getSiteSettings, resolvePageMeta, isParentTemplate, isChildTemplate } from "../lib/wp";
+import { getPageByPath, getSiteSettings, resolvePageMeta, isParentTemplate, isChildTemplate, isFullwidthTemplate } from "../lib/wp";
 import ParentPageLayout from "../layouts/ParentPageLayout.astro";
 import ChildPageLayout from "../layouts/ChildPageLayout.astro";
 import DefaultPageLayout from "../layouts/DefaultPageLayout.astro";
+import FullWidthPageLayout from "../layouts/FullWidthPageLayout.astro";
 
 // Freshness is governed entirely by the app-level cache in src/lib/wp.ts
 // (TTL + webhook purge) — an upstream proxy/CDN caching this HTML on top of
@@ -48,7 +49,9 @@ const Layout = isParentTemplate(page.template)
   ? ParentPageLayout
   : isChildTemplate(page.template)
     ? ChildPageLayout
-    : DefaultPageLayout;
+    : isFullwidthTemplate(page.template)
+      ? FullWidthPageLayout
+      : DefaultPageLayout;
 ---
 
 <Layout page={page} ancestors={ancestors} meta={meta} />
