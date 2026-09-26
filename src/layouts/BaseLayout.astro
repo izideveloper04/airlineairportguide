@@ -68,21 +68,7 @@ const schemaJson = schema
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
     <link rel="icon" type="image/png" sizes="512x512" href="/favicon-512x512.png" />
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
-    <meta name="google-site-verification" content="FURR_C2ZAIkTC6s15wsjI5yxXoe6imHRfnDL6a5Z5aE" />
     {isStaging && <meta name="robots" content="noindex, nofollow" />}
-    {!isStaging && (
-      <>
-        {/* Google tag (gtag.js) — gated on !isStaging like the noindex tag
-            above, so local dev and pre-launch traffic never lands in GA4. */}
-        <script async src="https://www.googletagmanager.com/gtag/js?id=G-P01QR5QK05"></script>
-        <script is:inline>
-          window.dataLayer = window.dataLayer || [];
-          function gtag() { dataLayer.push(arguments); }
-          gtag("js", new Date());
-          gtag("config", "G-P01QR5QK05");
-        </script>
-      </>
-    )}
     {description && <meta name="description" content={description} />}
     <link rel="canonical" href={canonical ?? new URL(Astro.url.pathname, Astro.site).toString()} />
 
