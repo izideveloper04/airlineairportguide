@@ -1,9 +1,16 @@
 ---
 // Hand-built contact page (not from WP). The form is presentational only:
 // submit is intercepted client-side and just shows a confirmation — nothing
-// is sent or stored anywhere. Prerendered, since there's nothing dynamic.
+// is sent or stored anywhere.
 // "contact-us" is reserved in RESERVED_SLUGS (wp.ts) so a WP page can never
 // shadow this route.
+// SSR despite being fully static: a prerendered page builds to
+// contact-us/index.html, which the Node static handler serves by
+// redirecting /contact-us -> /contact-us/, and the trailing-slash
+// normalization in middleware.ts redirects it straight back — an infinite
+// redirect loop. Keep this on-demand like every other page.
+export const prerender = false;
+
 import BaseLayout from "../layouts/BaseLayout.astro";
 import Breadcrumbs from "../components/Breadcrumbs.astro";
 ---
