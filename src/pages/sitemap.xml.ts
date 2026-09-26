@@ -7,7 +7,7 @@ import { getPageTree } from "../lib/wp";
 // reuses the same TTL-cached page tree as every content-page request.
 export const prerender = false;
 
-const STATIC_PATHS = [""]; // homepage; add other hand-built landing pages here as they're added
+const STATIC_PATHS = ["", "contact-us"]; // homepage; add other hand-built landing pages here as they're added
 
 export const GET: APIRoute = async ({ site }) => {
   const base = site?.toString().replace(/\/+$/, "") ?? "";

@@ -1,0 +1,69 @@
+---
+// Hand-built contact page (not from WP). The form is presentational only:
+// submit is intercepted client-side and just shows a confirmation — nothing
+// is sent or stored anywhere. Prerendered, since there's nothing dynamic.
+// "contact-us" is reserved in RESERVED_SLUGS (wp.ts) so a WP page can never
+// shadow this route.
+import BaseLayout from "../layouts/BaseLayout.astro";
+import Breadcrumbs from "../components/Breadcrumbs.astro";
+---
+
+<BaseLayout
+  title="Contact AirlineAirportGuide - Questions & Feedback"
+  description="Get in touch with AirlineAirportGuide for questions, corrections, feedback, and suggestions relating to airline, airport, and travel information."
+>
+  <div class="page-hero" slot="hero">
+    <div class="page-hero__inner">
+      <div class="page-hero__main">
+        <Breadcrumbs items={[{ label: "Contact Us" }]} />
+        <h1 class="page-hero__title">Contact Us</h1>
+      </div>
+    </div>
+  </div>
+
+  <div class="prose mb-8">
+    <p>
+      Have a question, spotted an outdated detail, or need clarification about information published on AirlineAirportGuide? We are here to hear from you.
+    </p>
+  </div>
+
+  <form id="contact-form" class="comment-form" novalidate>
+    <div class="comment-form__row">
+      <label for="contact-name">Name</label>
+      <input id="contact-name" name="name" type="text" autocomplete="name" required />
+    </div>
+    <div class="comment-form__row">
+      <label for="contact-email">Email</label>
+      <input id="contact-email" name="email" type="email" autocomplete="email" required />
+    </div>
+    <div class="comment-form__row">
+      <label for="contact-subject">Subject</label>
+      <input id="contact-subject" name="subject" type="text" />
+    </div>
+    <div class="comment-form__row">
+      <label for="contact-message">Message</label>
+      <textarea id="contact-message" name="message" rows="6" required></textarea>
+    </div>
+    <button type="submit">Send Message</button>
+    <p id="contact-status" class="comment-form__status" role="status" aria-live="polite"></p>
+  </form>
+</BaseLayout>
+
+<script>
+  const form = document.getElementById("contact-form") as HTMLFormElement | null;
+  const status = document.getElementById("contact-status");
+
+  form?.addEventListener("submit", (event) => {
+    event.preventDefault();
+    if (!status) return;
+
+    if (!form.checkValidity()) {
+      form.reportValidity();
+      return;
+    }
+
+    form.reset();
+    status.className = "comment-form__status comment-form__status--ok";
+    status.textContent = "Your message has been submitted successfully. Thank you for contacting us!";
+  });
+</script>
