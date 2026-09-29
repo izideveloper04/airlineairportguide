@@ -234,6 +234,18 @@ function normalizePath(path: string): string {
   return path.trim().replace(/^\/+|\/+$/g, "").toLowerCase();
 }
 
+/** Comparison key for a path: WP stores non-ASCII slugs percent-encoded
+ *  (e.g. "fua%ca%bbamotu") while Astro hands us the decoded request path
+ *  ("fuaʻamotu"), so both sides are decoded before matching. */
+function pathKey(path: string): string {
+  const normalized = normalizePath(path);
+  try {
+    return decodeURIComponent(normalized).toLowerCase();
+  } catch {
+    return normalized;
+  }
+}
+
 /** `undefined` if any ancestor is missing from `byId` — i.e. the page sits
  *  under a parent that isn't published, so it isn't reachable at any URL
  *  (same rule as walkAncestors below). */
@@ -597,7 +609,7 @@ function toFullPage(p: RawWPPage, fullPath: string): WPPage {
  * getPageTree()-backed lookup, this never depends on the size of the rest
  * of the catalog.
  */
-async function resolveByPath(normalized: string): Promise<{ raw: RawWPPage; ancestors: Breadcrumb[] } | undefined> {
+async function resolveByPath(normalized: string): Promise<{ raw: RawWPPage; ancestors: Breadcrumb[]; fullPath: string } | undefined> {
   const segments = normalized.split("/");
   const leafSlug = segments[segments.length - 1];
 
@@ -608,7 +620,7 @@ async function resolveByPath(normalized: string): Promise<{ raw: RawWPPage; ance
     if (!ancestorLinks) continue;
 
     const candidateFullPath = normalizePath([...ancestorLinks.map((a) => a.slug), candidate.slug].join("/"));
-    if (candidateFullPath !== normalized) continue;
+    if (pathKey(candidateFullPath) !== pathKey(normalized)) continue;
 
     let acc = "";
     const ancestors: Breadcrumb[] = ancestorLinks.map((a) => {
@@ -616,7 +628,7 @@ async function resolveByPath(normalized: string): Promise<{ raw: RawWPPage; ance
       return { title: a.title, fullPath: acc };
     });
 
-    return { raw: candidate, ancestors };
+    return { raw: candidate, ancestors, fullPath: candidateFullPath };
   }
 
   return undefined;
@@ -634,7 +646,7 @@ export async function getPageByPath(path: string): Promise<ResolvedPage | undefi
 
   const found = await resolveByPath(normalized);
   const resolved: ResolvedPage | null = found
-    ? { page: toFullPage(found.raw, normalized), ancestors: found.ancestors }
+    ? { page: toFullPage(found.raw, found.fullPath), ancestors: found.ancestors }
     : null;
 
   resolvedPageCache.set(normalized, { resolved, expires: now + PAGE_TREE_CACHE_TTL_MS });
